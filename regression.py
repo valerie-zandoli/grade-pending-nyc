@@ -9,10 +9,18 @@ in each one.
 """
 from __future__ import annotations
 
+import warnings
 from math import erf, sqrt
 
 import numpy as np
 import pandas as pd
+
+# Apple Accelerate's BLAS backend emits spurious "divide by zero"/"overflow"
+# RuntimeWarnings on some `@` matmuls (reproducible on random data of the
+# same shape, unrelated to the data actually being fit) on numpy 2.0.2/arm64.
+# Suppressed here, once, where the matmuls actually happen, rather than in
+# every script that calls into this module.
+warnings.filterwarnings("ignore", message=".*encountered in matmul", category=RuntimeWarning)
 
 INITIAL = "Cycle Inspection / Initial Inspection"
 REINSPECTION = "Cycle Inspection / Re-inspection"

@@ -2,19 +2,12 @@
 from __future__ import annotations
 
 import json
-import warnings
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from regression import build_paired_dataset, design_matrix, fit_clustered_logit, odds_ratio_table
-
-# Apple Accelerate's BLAS backend emits spurious "divide by zero"/"overflow"
-# RuntimeWarnings on some `@` matmuls (reproducible on random data of the
-# same shape, unrelated to this dataset) on numpy 2.0.2/arm64. Suppress only
-# this narrow category so a real numerical issue elsewhere still surfaces.
-warnings.filterwarnings("ignore", message=".*encountered in matmul", category=RuntimeWarning)
 
 DATA = Path("data/restaurant-analysis/restaurant_data.json")
 
