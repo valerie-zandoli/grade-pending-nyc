@@ -5,7 +5,7 @@ it's 50% — even after adjusting for how bad the citation was, cuisine, and
 timing.** That gap is a signal worth DOHMH's attention, not borough noise.
 
 A restaurant-clustered logistic regression on NYC DOHMH re-inspection outcomes,
-built for week 6 of Pursuit's AI program.
+built during week 6 of enrollment in Pursuit's AI Native program.
 
 ## The finding
 
