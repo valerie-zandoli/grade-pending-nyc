@@ -23,6 +23,16 @@ distinguishable from Manhattan at this sample size — the effect isn't
 See the [dashboard](README.md#dashboard) below for the full breakdown, or run
 `python3 analyze_reinspection_model.py` for the raw model output.
 
+## Why does the gap exist?
+
+[`INVESTIGATION.md`](INVESTIGATION.md) tests three candidate mechanisms
+against the full inspection extract — worse initial citations, a shorter
+compliance window before re-inspection, and repeat violations of the same
+code — and rules out all three. The gap survives each test, which points to
+something not published in this dataset (inspector assignment, staffing
+levels per borough) rather than anything the restaurants themselves are
+doing differently.
+
 ## Modeling choice worth flagging
 
 **Pre-2023 re-inspections are collapsed into a single "2022 or earlier"
