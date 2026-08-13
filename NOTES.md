@@ -1,5 +1,9 @@
 # Grade Pending NYC — dataset notes
 
+*Data reference, not the project write-up — see [`README.md`](README.md) for
+the finding and [`INVESTIGATION.md`](INVESTIGATION.md) for the mechanism
+hunt.*
+
 Source: NYC DOHMH Restaurant Inspection Results
 `https://data.cityofnewyork.us/resource/43nn-pn8j.json`
 Full table: 295,054 rows. Sample pulled to `data/sample_1000.json` via `?$limit=1000`.

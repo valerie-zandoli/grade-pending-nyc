@@ -7,6 +7,15 @@ timing.** That gap is a signal worth DOHMH's attention, not borough noise.
 A restaurant-clustered logistic regression on NYC DOHMH re-inspection outcomes,
 built during week 6 of enrollment in Pursuit's AI Native program.
 
+> **This README is the canonical write-up.** [`index.html`](index.html) is the
+> same finding as a shareable one-page site (open it directly, or serve it
+> locally — see Contents below). [`INVESTIGATION.md`](INVESTIGATION.md) is the
+> technical appendix on *why* the gap exists. [`NOTES.md`](NOTES.md) is a data
+> reference, not a narrative. [`01ChatGradePending.md`](01ChatGradePending.md)
+> is a raw, unedited transcript of an earlier working session, kept for
+> process transparency — it's an archival log, not a maintained document, and
+> nothing in it should be treated as more current than what's written here.
+
 ## The finding
 
 On 3,921 paired initial→re-inspection visits since 2016 (3,462 unique

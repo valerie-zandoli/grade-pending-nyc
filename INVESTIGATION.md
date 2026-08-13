@@ -1,5 +1,8 @@
 # Why the Bronx/Queens gap? A mechanism hunt
 
+*Technical appendix to [`README.md`](README.md), which is the canonical
+write-up of the finding this investigation is chasing an explanation for.*
+
 [`analyze_reinspection_model.py`](analyze_reinspection_model.py) establishes
 *that* Bronx and Queens restaurants have significantly worse odds of a B/C
 re-grade than Manhattan, adjusted for prior score, cuisine, and year. This
