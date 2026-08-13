@@ -1,0 +1,42 @@
+=== Initial-inspection violation load by borough ===
+               n_violations  n_critical  n_structural  score
+boro                                                        
+Manhattan              1.29        0.71          0.58  21.33
+Bronx                  1.31        0.72          0.66  21.76
+Brooklyn               1.32        0.73          0.63  22.20
+Queens                 1.34        0.76          0.60  23.29
+Staten Island          1.26        0.75          0.55  20.15
+
+Share of initial visits with >=1 structural/physical-condition violation (pests, temperature control, facility condition):
+boro
+Manhattan        0.496
+Bronx            0.543
+Brooklyn         0.529
+Queens           0.514
+Staten Island    0.489
+Name: any_structural, dtype: float64
+
+=== Days between initial inspection and re-inspection, by borough ===
+               median   mean  count
+borough                            
+Manhattan       146.0  153.0   1314
+Bronx           124.5  140.6    410
+Brooklyn        120.0  143.3    899
+Queens          127.0  144.9   1022
+Staten Island   154.0  164.4    129
+
+=== Share of re-inspections citing at least one violation code that also appeared at the initial visit ===
+               share_any_recurring_code  n_paired  b_or_c_rate
+borough                                                       
+Manhattan                         0.138    1314.0        0.377
+Bronx                             0.168     410.0        0.478
+Brooklyn                          0.152     899.0        0.430
+Queens                            0.145    1022.0        0.475
+Staten Island                     0.109     129.0        0.357
+
+Correlation check: does a recurring violation code predict a B/C re-grade, within each borough?
+  Manhattan: B/C rate with recurring code = 0.40 (n=181), without = 0.37 (n=1133)
+  Bronx: B/C rate with recurring code = 0.49 (n=69), without = 0.48 (n=341)
+  Brooklyn: B/C rate with recurring code = 0.50 (n=137), without = 0.42 (n=762)
+  Queens: B/C rate with recurring code = 0.46 (n=148), without = 0.48 (n=874)
+  Staten Island: B/C rate with recurring code = 0.50 (n=14), without = 0.34 (n=115)

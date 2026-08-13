@@ -29,23 +29,31 @@ from investigate_borough_gap import (  # noqa: E402
 
 class TestIsStructural(unittest.TestCase):
     def test_matches_pest_language(self):
-        self.assertTrue(is_structural("Evidence of mice or live mice present"))
-        self.assertTrue(is_structural("Facility not vermin proof"))
+        self.assertTrue(is_structural(None, "Evidence of mice or live mice present"))
+        self.assertTrue(is_structural(None, "Facility not vermin proof"))
 
-    def test_matches_temperature_language(self):
-        self.assertTrue(is_structural("Cold food item held above 41F"))
-        self.assertTrue(is_structural("Hot holding temperature not maintained"))
+    def test_matches_temperature_by_code_prefix(self):
+        # Real DOHMH text ("Cold TCS food item held above 41 F") never
+        # contains a "cold holding"/"hot holding" keyword literally -- this
+        # has to be matched by the 02-family violation code, not the text.
+        self.assertTrue(is_structural("02G", "Cold TCS food item held above 41 °F."))
+        self.assertTrue(is_structural("02B", "Hot TCS food item not held at or above 140 °F."))
 
-    def test_is_case_insensitive(self):
-        self.assertTrue(is_structural("EVIDENCE OF ROACHES"))
+    def test_rejects_non_temperature_code_even_with_similar_wording(self):
+        # Code prefix is authoritative; a non-02 code shouldn't be swept in
+        # just because it happens to mention temperature-adjacent words.
+        self.assertFalse(is_structural("06C", "Food not protected from potential source of contamination."))
+
+    def test_is_case_insensitive_for_keyword_matches(self):
+        self.assertTrue(is_structural(None, "EVIDENCE OF ROACHES"))
 
     def test_rejects_procedural_language(self):
-        self.assertFalse(is_structural("Failure to post the required signage"))
-        self.assertFalse(is_structural("Permit not conspicuously displayed"))
+        self.assertFalse(is_structural("04A", "Failure to post the required signage"))
+        self.assertFalse(is_structural("20-08", "Permit not conspicuously displayed"))
 
-    def test_handles_non_string_input(self):
-        self.assertFalse(is_structural(None))
-        self.assertFalse(is_structural(float("nan")))
+    def test_handles_missing_code_and_description(self):
+        self.assertFalse(is_structural(None, None))
+        self.assertFalse(is_structural(float("nan"), float("nan")))
 
 
 class TestComputeInitialViolationLoad(unittest.TestCase):
@@ -83,10 +91,11 @@ class TestComputeInitialViolationLoad(unittest.TestCase):
 
 
 class TestComputeReinspectionGaps(unittest.TestCase):
-    def _row(self, camis, boro, itype, date, code=None, grade=None):
+    def _row(self, camis, boro, itype, date, code=None, grade=None, score="10"):
         return {
             "camis": camis, "boro": boro, "inspection_type": itype,
             "inspection_date": pd.Timestamp(date), "violation_code": code, "grade": grade,
+            "score": score,
         }
 
     def test_computes_days_between_visits(self):

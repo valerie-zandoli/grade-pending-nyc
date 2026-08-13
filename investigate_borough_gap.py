@@ -28,16 +28,25 @@ DATA = Path("data/restaurant-analysis/restaurant_data.json")
 # (pests, facility condition, equipment) rather than paperwork/procedural
 # ones (labeling, permits, posting) — a rough split to test whether Bronx/
 # Queens citations skew toward the kind of problem that takes more than a
-# quick fix.
+# quick fix. Temperature-control citations are matched by NYC's "02"
+# violation-code family (see is_structural) rather than by keyword: their
+# real text ("Cold TCS food item held above 41 F", "Hot TCS food item not
+# held at or above 140 F") never contains the literal phrases "cold
+# holding"/"hot holding" that an earlier version of this list looked for --
+# checked against the full 50k-row extract, that missed ~93% of real
+# temperature-control citations.
 STRUCTURAL_KEYWORDS = [
     "vermin", "mice", "rats", "roach", "pest", "evidence of", "harborage",
     "facility not vermin proof", "sewage", "plumbing", "refrigerat",
-    "cold holding", "hot holding", "food temperature", "thermometer",
     "ventilation", "lighting", "floors, walls", "ceiling", "wall", "floor",
 ]
 
+TEMPERATURE_CODE_PREFIX = "02"
 
-def is_structural(description: str) -> bool:
+
+def is_structural(violation_code, description) -> bool:
+    if isinstance(violation_code, str) and violation_code.startswith(TEMPERATURE_CODE_PREFIX):
+        return True
     if not isinstance(description, str):
         return False
     text = description.lower()
@@ -49,7 +58,9 @@ def compute_initial_violation_load(cycle: pd.DataFrame) -> pd.DataFrame:
     critical, how many structural/physical-condition, and the score."""
     initial_rows = cycle[cycle["inspection_type"] == INITIAL].copy()
     initial_rows["is_critical"] = initial_rows["critical_flag"] == "Critical"
-    initial_rows["is_structural"] = initial_rows["violation_description"].apply(is_structural)
+    initial_rows["is_structural"] = initial_rows.apply(
+        lambda r: is_structural(r["violation_code"], r["violation_description"]), axis=1
+    )
 
     visit_load = (
         initial_rows.groupby(["camis", "inspection_date", "boro"])

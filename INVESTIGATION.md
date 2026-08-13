@@ -18,9 +18,17 @@ meaningfully. Violation counts, critical-violation counts, and inspection
 scores at the initial visit are nearly identical across boroughs (1.29
 violations/visit in Manhattan vs. 1.31–1.34 elsewhere). Bronx and Queens
 skew somewhat more toward structural/physical-condition violations — pests,
-temperature control — (41.5% and 37.9% of visits vs. Manhattan's 36.2%), but
-the gap is modest, not the kind of difference that plausibly drives a
-7-point re-grade gap by itself.
+temperature control, facility condition — (54.3% and 51.4% of visits vs.
+Manhattan's 49.6%), but the gap is modest, not the kind of difference that
+plausibly drives a 7-point re-grade gap by itself. (Corrected from an
+earlier pass that flagged temperature-control citations by keyword match
+against the violation description — real DOHMH text like "Cold TCS food
+item held above 41°F" never contains a literal "cold holding"/"hot
+holding" phrase, so that approach missed ~93% of actual temperature
+citations. Fixed by matching NYC's "02" violation-code family instead,
+which is exhaustive by construction. The correction raises every borough's
+share by roughly the same amount and leaves the ordering and conclusion
+unchanged — see `tests/test_borough_gap.py`.)
 
 **2. Do Bronx/Queens restaurants have less time to fix the problem before
 re-inspection?** Tested and **ruled out** — in the wrong direction, if
