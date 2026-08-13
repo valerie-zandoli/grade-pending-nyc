@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import sys
 import unittest
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -55,6 +56,12 @@ class TestNormalPValue(unittest.TestCase):
 class TestFitClusteredLogit(unittest.TestCase):
     """Exercises the hand-rolled IRLS fit and its cluster-robust SEs on
     synthetic data with a known answer, independent of the real dataset."""
+
+    def setUp(self):
+        # unittest resets warning filters to "always" per test, which would
+        # otherwise re-surface the benign Apple-Accelerate matmul warning
+        # that regression.py already suppresses for normal (non-test) runs.
+        warnings.filterwarnings("ignore", message=".*encountered in matmul", category=RuntimeWarning)
 
     def test_recovers_known_coefficients(self):
         rng = np.random.default_rng(0)
