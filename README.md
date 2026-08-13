@@ -85,16 +85,43 @@ pip install -r requirements.txt
   pulls up to 50,000 rows from the public API into
   `restaurant_data.json` (gitignored — regenerate locally with
   `python3 download_data.py` from that directory; ~50MB, too large to track).
+- [`regression.py`](regression.py) — the shared statistics module: the
+  initial→re-inspection pairing logic, the hand-rolled IRLS logistic fit, and
+  the restaurant-clustered standard errors. Both scripts below import it
+  rather than each keeping their own copy.
 - [`analyze_reinspection_model.py`](analyze_reinspection_model.py) — the
   restaurant-clustered logistic regression described above.
+- [`investigate_borough_gap.py`](investigate_borough_gap.py) /
+  [`investigate_deeper_mechanisms.py`](investigate_deeper_mechanisms.py) —
+  the two-round mechanism hunt behind [`INVESTIGATION.md`](INVESTIGATION.md).
+- [`tests/test_regression.py`](tests/test_regression.py) — automated tests
+  for `regression.py`: synthetic-data checks that always run, plus a
+  regression test against the real dataset that's skipped automatically if
+  you haven't downloaded it yet.
 
 ## Running the analysis
 
 ```bash
-python3 analyze_reinspection_model.py
+python3 analyze_reinspection_model.py        # the headline borough-adjusted model
+python3 investigate_borough_gap.py           # round 1 of the mechanism hunt
+python3 investigate_deeper_mechanisms.py     # round 2 of the mechanism hunt
 ```
 
-Results are also saved to [`outputs/reinspection_model_results.txt`](outputs/reinspection_model_results.txt).
+Results are also saved to [`outputs/reinspection_model_results.txt`](outputs/reinspection_model_results.txt)
+and [`outputs/deeper_mechanisms_results.txt`](outputs/deeper_mechanisms_results.txt).
+
+## Testing
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+Runs a set of checks that don't need any data (does the logistic fit recover
+a known coefficient on synthetic data, does the cluster correction actually
+behave differently from a naive fit, does the pairing logic handle a small
+hand-built example correctly), plus — if you've run `download_data.py` so
+`data/restaurant-analysis/restaurant_data.json` exists locally — a regression
+test that the full pipeline still matches the numbers in `outputs/`.
 
 ## Limitations
 

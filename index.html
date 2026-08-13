@@ -370,19 +370,24 @@
     <div class="wrap">
       <p class="section-kicker">Reproduce this</p>
       <h2>Run the analysis locally</h2>
-      <p class="section-intro">Requires Python 3 with pandas and numpy.</p>
+      <p class="section-intro">Requires Python 3 with pandas, numpy, and requests (for the downloader).</p>
       <pre><code>pip install -r requirements.txt
-python3 analyze_reinspection_model.py          # borough-adjusted logistic model
-python3 investigate_borough_gap.py             # the mechanism hunt behind "why"
-python3 data/restaurant-analysis/download_data.py   # regenerate the 50k-row extract</code></pre>
+python3 analyze_reinspection_model.py               # borough-adjusted logistic model
+python3 investigate_borough_gap.py                  # round 1 of the mechanism hunt
+python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt
+python3 data/restaurant-analysis/download_data.py    # regenerate the 50k-row extract
+python3 -m unittest discover -s tests -v             # run the test suite</code></pre>
 
       <h3 style="font-size:16px; margin:28px 0 10px;">Contents</h3>
       <ul class="contents-list">
+        <li><a href="README.md">README.md</a> — canonical write-up of the finding.</li>
         <li><a href="NOTES.md">NOTES.md</a> — source data structure and gotchas.</li>
-        <li><a href="README.md">README.md</a> — full write-up of the finding.</li>
-        <li><a href="INVESTIGATION.md">INVESTIGATION.md</a> — the mechanism-hunt write-up.</li>
+        <li><a href="INVESTIGATION.md">INVESTIGATION.md</a> — the two-round mechanism-hunt write-up.</li>
+        <li><a href="regression.py">regression.py</a> — shared pairing logic, IRLS fit, and clustered standard errors used by both scripts below.</li>
         <li><a href="analyze_reinspection_model.py">analyze_reinspection_model.py</a> — the restaurant-clustered logistic regression.</li>
-        <li><a href="investigate_borough_gap.py">investigate_borough_gap.py</a> — tests the three candidate mechanisms.</li>
+        <li><a href="investigate_borough_gap.py">investigate_borough_gap.py</a> — round 1: tests three candidate mechanisms.</li>
+        <li><a href="investigate_deeper_mechanisms.py">investigate_deeper_mechanisms.py</a> — round 2: density, reporting lag, inspector assignment.</li>
+        <li><a href="tests/test_regression.py">tests/test_regression.py</a> — automated tests (synthetic-data checks plus a regression test against saved results).</li>
         <li><a href="data/sample_1000.json">data/sample_1000.json</a> — 1,000-row raw sample.</li>
         <li><a href="data/by_camis.json">data/by_camis.json</a> — derived summary keyed by restaurant ID.</li>
         <li><a href="outputs/reinspection_model_results.txt">outputs/reinspection_model_results.txt</a> / <a href="outputs/deeper_mechanisms_results.txt">deeper_mechanisms_results.txt</a> — saved outputs.</li>
