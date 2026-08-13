@@ -5,134 +5,18 @@ patterns."""
 from __future__ import annotations
 
 import json
-import warnings
 from pathlib import Path
-from math import erf, sqrt
 
 import numpy as np
 import pandas as pd
 
-warnings.filterwarnings("ignore", message=".*encountered in matmul", category=RuntimeWarning)
+from regression import build_paired_dataset, design_matrix, fit_clustered_logit, odds_ratio_table
 
 DATA = Path("data/restaurant-analysis/restaurant_data.json")
-INITIAL = "Cycle Inspection / Initial Inspection"
-REINSPECTION = "Cycle Inspection / Re-inspection"
-BOROUGHS = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
-
-
-def normal_p_value(z: float) -> float:
-    return 2 * (1 - 0.5 * (1 + erf(abs(z) / sqrt(2))))
-
-
-def fit_logistic(X: np.ndarray, y: np.ndarray, df_camis: pd.Series):
-    """Same IRLS + restaurant-clustered sandwich SEs as analyze_reinspection_model.py."""
-    beta = np.zeros(X.shape[1])
-
-    def log_likelihood(b):
-        linear = np.clip(X @ b, -30, 30)
-        return float(np.sum(y * linear - np.logaddexp(0, linear)))
-
-    current_ll = log_likelihood(beta)
-    for _ in range(100):
-        eta = np.clip(X @ beta, -30, 30)
-        mu = 1 / (1 + np.exp(-eta))
-        w = np.clip(mu * (1 - mu), 1e-9, None)
-        hessian = X.T @ (X * w[:, None])
-        score = X.T @ (y - mu)
-        step = np.linalg.lstsq(hessian, score, rcond=None)[0]
-        multiplier, beta_next = 1.0, beta + step
-        while log_likelihood(beta_next) < current_ll and multiplier > 1e-6:
-            multiplier /= 2
-            beta_next = beta + multiplier * step
-        if np.max(np.abs(multiplier * step)) < 1e-9:
-            beta = beta_next
-            break
-        beta = beta_next
-        current_ll = log_likelihood(beta)
-    else:
-        raise RuntimeError("IRLS did not converge")
-
-    mu = 1 / (1 + np.exp(-np.clip(X @ beta, -30, 30)))
-    bread = np.linalg.inv(X.T @ (X * (mu * (1 - mu))[:, None]))
-    cluster_scores = []
-    for _, positions in df_camis.groupby(df_camis).groups.items():
-        positions = np.asarray([df_camis.index.get_loc(p) for p in positions])
-        cluster_scores.append(X[positions].T @ (y[positions] - mu[positions]))
-    meat = sum(np.outer(s, s) for s in cluster_scores)
-    g, n, p = len(cluster_scores), len(y), X.shape[1]
-    covariance = bread @ meat @ bread * (g / (g - 1)) * ((n - 1) / (n - p))
-    se = np.sqrt(np.diag(covariance))
-    return beta, se, g, n
-
-
-def build_paired_dataset(raw: pd.DataFrame) -> pd.DataFrame:
-    raw = raw[raw["inspection_type"].isin([INITIAL, REINSPECTION])].copy()
-    raw["inspection_date"] = pd.to_datetime(raw["inspection_date"])
-    visit = (
-        raw.sort_values("inspection_date")
-        .groupby(["camis", "inspection_date", "inspection_type"], as_index=False)
-        .first()
-    )
-    visit["score"] = pd.to_numeric(visit["score"], errors="coerce")
-    visit["year"] = visit["inspection_date"].dt.year
-
-    paired = []
-    for camis, group in visit.groupby("camis", sort=False):
-        prior_initial = None
-        for row in group.sort_values("inspection_date").itertuples(index=False):
-            if row.inspection_type == INITIAL:
-                prior_initial = row
-            elif row.inspection_type == REINSPECTION and prior_initial is not None:
-                paired.append(
-                    {
-                        "camis": camis,
-                        "borough": row.boro,
-                        "cuisine": row.cuisine_description,
-                        "reinspection_year": row.year,
-                        "initial_score": prior_initial.score,
-                        "grade": row.grade,
-                        "community_board": row.community_board,
-                    }
-                )
-    df = pd.DataFrame(paired)
-    df = df[df["grade"].isin(["A", "B", "C"])].dropna(
-        subset=["borough", "cuisine", "initial_score", "reinspection_year"]
-    )
-    df = df[df["borough"].isin(BOROUGHS)]
-    df = df[df["reinspection_year"] >= 2016].copy()
-    df["b_or_c"] = df["grade"].isin(["B", "C"]).astype(int)
-    df["initial_score_10"] = df["initial_score"] / 10.0
-    df["year_model"] = df["reinspection_year"].where(
-        df["reinspection_year"] >= 2023, "2022 or earlier"
-    ).astype(str)
-    cuisine_count = df["cuisine"].value_counts()
-    df["cuisine_model"] = df["cuisine"].where(df["cuisine"].map(cuisine_count) >= 20, "Other / rare cuisine")
-    return df
-
-
-def design_matrix(df: pd.DataFrame, extra_cols: list[str] | None = None):
-    parts = [df[["initial_score_10"]]]
-    if extra_cols:
-        parts.append(df[extra_cols])
-    parts += [
-        pd.get_dummies(df["borough"], prefix="borough", drop_first=False, dtype=float).drop(columns="borough_Manhattan"),
-        pd.get_dummies(df["cuisine_model"], prefix="cuisine", drop_first=True, dtype=float),
-        pd.get_dummies(df["year_model"], prefix="year", drop_first=True, dtype=float),
-    ]
-    design = pd.concat(parts, axis=1)
-    X = np.column_stack([np.ones(len(df)), design.to_numpy(float)])
-    columns = ["Intercept", *design.columns]
-    return X, columns
 
 
 def report_boroughs(beta, se, columns, label):
-    result = pd.DataFrame({
-        "term": columns,
-        "odds_ratio": np.exp(beta),
-        "ci_low": np.exp(beta - 1.96 * se),
-        "ci_high": np.exp(beta + 1.96 * se),
-        "p_value": [normal_p_value(b / s) for b, s in zip(beta, se)],
-    })
+    result = odds_ratio_table(beta, se, columns)
     borough_result = result[result.term.str.startswith("borough_")].copy()
     borough_result["borough"] = borough_result.term.str.removeprefix("borough_")
     print(f"\n{label}")
@@ -161,7 +45,7 @@ def main() -> None:
     print(f"\nCommunity boards with density data: {len(density)}")
     print(f"Restaurants per board: min={density.min()}, median={density.median():.0f}, max={density.max()}")
 
-    df = build_paired_dataset(raw)
+    df = build_paired_dataset(raw, extra_visit_cols=["community_board"])
     df = df.dropna(subset=["community_board"])
     df["board_restaurant_count"] = df["community_board"].map(density)
     df = df.dropna(subset=["board_restaurant_count"])
@@ -173,11 +57,11 @@ def main() -> None:
 
     X0, cols0 = design_matrix(df)
     y = df["b_or_c"].to_numpy(float)
-    beta0, se0, g0, n0 = fit_logistic(X0, y, df["camis"])
+    beta0, se0, cov0, g0, n0 = fit_clustered_logit(X0, y, df["camis"])
     report_boroughs(beta0, se0, cols0, "Baseline model (no density term), same covariates as analyze_reinspection_model.py:")
 
     X1, cols1 = design_matrix(df, extra_cols=["log_density"])
-    beta1, se1, g1, n1 = fit_logistic(X1, y, df["camis"])
+    beta1, se1, cov1, g1, n1 = fit_clustered_logit(X1, y, df["camis"])
     result1 = report_boroughs(beta1, se1, cols1, "With log(restaurant density) added as a covariate:")
     density_row = result1[result1.term == "log_density"]
     print("\nDensity effect itself:")
