@@ -139,6 +139,38 @@ fetch `restaurant_data.json` (50MB, regenerable, gitignored on purpose), so
 the data-gated tests skip there by design; everything else runs for real on
 every push.
 
+## Supabase (groundwork, not yet live)
+
+[`supabase/`](supabase/) has a schema and a loader script for putting the raw
+inspection data into a real Postgres database via Supabase, as groundwork for
+a possible future live version of the site. **Nothing else in this repo uses
+it yet** — `index.html` still has its numbers baked in, and the analysis
+scripts still read the local JSON files directly. This is not deployed
+anywhere.
+
+Setup (you'll need to do steps 1–3 yourself in the Supabase dashboard — I
+can't create an account or project for you):
+
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In that project's SQL editor, run [`supabase/schema.sql`](supabase/schema.sql)
+   once — it creates a single `inspections` table matching the raw NYC feed's
+   own row grain (one row per violation cited on one inspection, same as
+   the JSON extract — see [`NOTES.md`](NOTES.md)).
+3. Project Settings → API: copy the Project URL and the `service_role` key.
+4. Copy [`.env.example`](.env.example) to `.env` (gitignored) and fill in
+   `SUPABASE_URL` and `SUPABASE_KEY` with those values.
+5. `pip install -r supabase/requirements.txt` (kept separate from the root
+   `requirements.txt` so installing the core analysis doesn't pull in
+   Supabase's client libraries until you actually want them).
+6. `python3 supabase/load_data.py --sample` to load the 1,000-row sample
+   first and confirm the connection works, then `python3 supabase/load_data.py`
+   for the full 50,000-row extract.
+
+The loader deliberately uses the `service_role` key (needs write access); a
+future live site reading from this table would use the public `anon` key
+with row-level security instead, not `service_role`, which should never
+reach a browser.
+
 ## Limitations
 
 - Single-pull sample, not the full 295k-row table — a fuller extract would
