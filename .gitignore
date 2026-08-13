@@ -5,6 +5,3 @@ __pycache__/
 # Regenerable via data/restaurant-analysis/download_data.py — 50MB, too
 # large to track comfortably in git.
 data/restaurant-analysis/restaurant_data.json
-
-# Raw RTF export of an earlier chat session — not readable as Markdown.
-01ChatGradePending.md
