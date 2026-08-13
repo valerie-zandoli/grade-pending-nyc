@@ -25,13 +25,15 @@ See the [dashboard](README.md#dashboard) below for the full breakdown, or run
 
 ## Why does the gap exist?
 
-[`INVESTIGATION.md`](INVESTIGATION.md) tests three candidate mechanisms
-against the full inspection extract — worse initial citations, a shorter
-compliance window before re-inspection, and repeat violations of the same
-code — and rules out all three. The gap survives each test, which points to
-something not published in this dataset (inspector assignment, staffing
-levels per borough) rather than anything the restaurants themselves are
-doing differently.
+[`INVESTIGATION.md`](INVESTIGATION.md) tests six candidate mechanisms across
+two rounds. Round 1 rules out worse initial citations, a shorter compliance
+window before re-inspection, and repeat violations of the same code — the
+gap survives all three. Round 2 tests the three explanations round 1
+couldn't reach: restaurant density is the strongest lead so far (adding it
+attenuates both borough effects to non-significance, though it's collinear
+with borough itself, so this is suggestive rather than conclusive);
+reporting lag and inspector assignment turn out to be **untestable** with
+this public dataset — DOHMH doesn't publish the fields that would be needed.
 
 ## Modeling choice worth flagging
 
@@ -63,6 +65,9 @@ pip install -r requirements.txt
 
 ## Contents
 
+- [`index.html`](index.html) / [`styles.css`](styles.css) / [`main.js`](main.js) —
+  a static one-page site presenting this write-up, deployable as-is to
+  GitHub Pages or any static host.
 - [`NOTES.md`](NOTES.md) — source data structure and gotchas.
 - [`data/sample_1000.json`](data/sample_1000.json) — 1,000-row raw sample.
 - [`data/by_camis.json`](data/by_camis.json) — derived summary of 969

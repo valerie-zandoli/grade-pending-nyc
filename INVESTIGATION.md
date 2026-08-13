@@ -38,14 +38,62 @@ B/C rate (in Queens: 46% B/C when a code recurs vs. 48% when it doesn't) —
 so the gap isn't concentrated among repeat offenders. It shows up broadly,
 including at restaurants whose re-inspection cited entirely new violations.
 
-## What's left
+## Round 1 conclusion
 
 None of the three mechanisms visible in the public inspection data — citation
 severity, compliance-window length, or repeat-violation patterns — account
-for the gap. It survives all three. The most likely remaining explanations
-(inspector assignment and staffing levels per borough, per-inspector
-workload, neighborhood-level factors correlated with a restaurant's borough)
-aren't published in this dataset. DOHMH doesn't release inspector IDs or
-staffing/assignment data publicly, so this analysis has gone as far as the
-public data allows — the honest conclusion is "not explained by anything
-observable here," not a confirmed cause.
+for the gap. It survives all three.
+
+## Round 2: density, reporting lag, inspector assignment
+
+[`investigate_deeper_mechanisms.py`](investigate_deeper_mechanisms.py) tests
+the three explanations named as "most likely" in round 1. Run it with
+`python3 investigate_deeper_mechanisms.py`; full output is saved to
+[`outputs/deeper_mechanisms_results.txt`](outputs/deeper_mechanisms_results.txt).
+
+**4. Does restaurant density explain the gap?** The dataset has no true
+population-density or foot-traffic field, so this uses the closest available
+proxy: the number of distinct restaurants per NYC community board in the
+50,000-row extract (68 boards, 1–1,927 restaurants each). Adding
+`log(board density)` to the regression **visibly attenuates both borough
+effects**: Bronx OR 1.35 → 1.16 (p=.018 → .358), Queens OR 1.28 → 1.20
+(p=.007 → .076) — both lose significance at the conventional 0.05 threshold.
+
+That is a real result, but not a clean one. Community-board density is
+itself strongly correlated with borough — the median board in Manhattan has
+908 restaurants versus 310 elsewhere — so this attenuation is genuinely
+ambiguous between two readings: density could be a real confound, or adding
+a covariate this collinear with borough could simply widen the standard
+errors (both CIs do widen) without density doing real explanatory work.
+**Verdict: suggestive, not conclusive.** Density is the first candidate in
+either round that visibly moves the estimate, and it's the strongest lead
+for follow-up — but it can't be reported as "explains the gap" on this
+evidence alone. A cleaner test would need restaurant density measured
+independently of borough (e.g., commercial square footage or foot traffic
+per census tract) rather than a restaurant count that borough itself drives.
+
+**5. Does reporting lag (inspection → public posting) explain the gap?**
+**Untestable with this dataset**, not ruled out. `record_date` looks like a
+per-inspection publish date but is actually a data-pull timestamp — it takes
+only 3 distinct values across 50,000 rows, all clustered on the day the
+extract was downloaded. `grade_date` looked like the alternative, but it
+equals `inspection_date` for 100% of the 22,405 graded rows (0-day
+"lag" always). Neither field measures what DOHMH actually took to post a
+result. This is a genuinely different outcome from "tested, no effect" —
+it means the question is still open, just not answerable from this feed.
+
+**6. Does inspector assignment or staffing explain the gap?** Still
+untestable. All 31 fields in the extract were enumerated by hand; none
+identify an inspector, a team, or a staffing level. Same conclusion as round
+1, confirmed directly against the field list rather than assumed.
+
+## What's left after both rounds
+
+Five of six candidate mechanisms are now addressed: three ruled out (round
+1), one suggestive-but-ambiguous (density), two confirmed untestable with
+public data (reporting lag, inspector assignment). The honest state of the
+question: **restaurant density is the strongest lead this analysis has
+produced, but it stops at "worth a cleaner test with independent density
+data," not "explains the gap."** Inspector assignment and staffing levels —
+plausible, common explanations for geographic disparities in public-agency
+outcomes — remain outside what DOHMH publishes.
