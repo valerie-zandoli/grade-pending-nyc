@@ -10,6 +10,7 @@ Run with: python3 -m unittest discover -s tests -v
 """
 from __future__ import annotations
 
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -19,6 +20,8 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from investigate_borough_gap import (  # noqa: E402
+    BOROUGHS,
+    DATA,
     INITIAL,
     REINSPECTION,
     compute_initial_violation_load,
@@ -164,6 +167,23 @@ class TestComputeReinspectionGaps(unittest.TestCase):
         # Paired with the March 1 initial (14 days), not the January one (73 days).
         self.assertEqual(gap_df.iloc[0]["days_to_reinspect"], 14)
         self.assertTrue(gap_df.iloc[0]["any_recurring"])
+
+
+@unittest.skipUnless(DATA.exists(), f"regenerate {DATA} with data/restaurant-analysis/download_data.py to run this test")
+class TestTemperatureCodesAreCaught(unittest.TestCase):
+    """Regression test for the specific bug this test file caught: real
+    temperature-control violation text never matched the old keyword list,
+    silently excluding ~93% of those citations from the "structural"
+    category. Locks in that the 02-code-family match actually works against
+    the real dataset, not just the hand-built examples above."""
+
+    def test_almost_all_temperature_codes_are_flagged_structural(self):
+        raw = pd.DataFrame(json.loads(DATA.read_text()))
+        raw = raw[raw["boro"].isin(BOROUGHS)].copy()
+        temp = raw[raw["violation_code"].str.startswith("02", na=False)]
+        self.assertGreater(len(temp), 1000)  # sanity: this code family is common
+        flagged = temp.apply(lambda r: is_structural(r["violation_code"], r["violation_description"]), axis=1)
+        self.assertEqual(flagged.mean(), 1.0)
 
 
 if __name__ == "__main__":
