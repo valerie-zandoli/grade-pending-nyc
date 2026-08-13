@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grade Pending NYC — Restaurant Re-inspection Analysis</title>
+<meta name="description" content="Bronx and Queens restaurants are significantly less likely to re-grade to an A after a NYC health-code violation than Manhattan restaurants, even after adjusting for citation severity, cuisine, and timing.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <strong>Grade Pending NYC</strong>
+    <a href="#finding">The finding</a>
+    <a href="#why">Why the gap?</a>
+    <a href="#data">The data</a>
+    <a href="#reproduce">Reproduce</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Pursuit AI Program · Week 6 data analysis</p>
+    <h1>Restaurants in the Bronx and Queens are less likely to recover an A grade</h1>
+    <p class="lede">
+      On 3,921 paired NYC DOHMH initial → re-inspection visits since 2016, Bronx and
+      Queens restaurants have significantly worse odds of landing a B or C grade at
+      re-inspection than Manhattan restaurants — holding prior inspection score,
+      cuisine, and re-inspection year fixed. Brooklyn and Staten Island aren't
+      statistically distinguishable from Manhattan.
+    </p>
+    <div class="stat-row">
+      <div class="stat-tile reference">
+        <p class="stat-label"><span class="dot reference"></span>Manhattan</p>
+        <p class="stat-value">56.7%</p>
+        <p class="stat-delta">reference borough</p>
+      </div>
+      <div class="stat-tile bad">
+        <p class="stat-label"><span class="dot bad"></span>Bronx</p>
+        <p class="stat-value">49.5%</p>
+        <p class="stat-delta">−7.2 pts · OR 1.36, p=.014</p>
+      </div>
+      <div class="stat-tile bad">
+        <p class="stat-label"><span class="dot bad"></span>Queens</p>
+        <p class="stat-value">51.1%</p>
+        <p class="stat-delta">−5.6 pts · OR 1.27, p=.009</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section id="finding">
+    <div class="wrap">
+      <p class="section-kicker">The finding</p>
+      <h2>A borough-specific gap, not an outer-borough effect</h2>
+      <p class="section-intro">
+        A restaurant-clustered logistic regression on 3,921 linked initial →
+        re-inspection visits (3,462 unique restaurants) finds that Bronx (OR 1.36,
+        95% CI 1.07–1.74, p=.014) and Queens (OR 1.27, 95% CI 1.06–1.52, p=.009)
+        restaurants have significantly worse odds of a B/C grade at re-inspection
+        than Manhattan, adjusted for prior score, cuisine, and year. Brooklyn (OR
+        1.16, p=.119) and Staten Island (OR 0.78, p=.207) are not statistically
+        distinguishable from Manhattan — so this isn't "outer boroughs vs.
+        Manhattan," it's specific to the Bronx and Queens.
+      </p>
+
+      <div class="chart-grid">
+        <div class="chart-block">
+          <div id="borough-reinspection-odds" role="figure" aria-label="Adjusted odds ratios for receiving an A grade at cycle re-inspection, by borough relative to Manhattan">
+            <style>
+              #borough-reinspection-odds { font-family: ui-sans-serif, system-ui, sans-serif; color: var(--foreground); max-width: 760px; margin: 0 auto; }
+              #borough-reinspection-odds h2 { font-size: 19px; margin: 0 0 3px; }
+              #borough-reinspection-odds p { margin: 0 0 13px; font-size: 13px; color: color-mix(in srgb, var(--foreground) 72%, transparent); }
+              #borough-reinspection-odds svg { display: block; width: 100%; }
+              #borough-reinspection-odds .axis { stroke: var(--border); stroke-width: 1; }
+              #borough-reinspection-odds .reference { stroke: var(--foreground); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: .65; }
+              #borough-reinspection-odds .label, #borough-reinspection-odds .tick { fill: var(--foreground); font-size: 12px; }
+              #borough-reinspection-odds .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
+              #borough-reinspection-odds .muted { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
+            </style>
+            <h2>Odds of Restaurants in the Bronx and Queens Achieving an A Grade after a Violation Compared to Manhattan</h2>
+            <svg id="plot" aria-label="Forest plot of adjusted odds of A grade by borough"></svg>
+            <script>
+              (() => {
+                const root = document.getElementById('borough-reinspection-odds');
+                const rows = [
+                  {name:'Bronx', or:.735, low:.575, high:.939, significant:true},
+                  {name:'Manhattan', or:1, low:1, high:1, reference:true},
+                  {name:'Queens', or:.787, low:.657, high:.943, significant:true}
+                ];
+                const svg = root.querySelector('#plot');
+                function render() {
+                  const W = Math.max(330, svg.clientWidth || 700), H = 285, left = 132, right = 92, top = 28, bottom = 46;
+                  const x0 = left, x1 = W - right, y0 = top, y1 = H - bottom, min=.4, max=2;
+                  const x = v => x0 + (Math.log(v)-Math.log(min))/(Math.log(max)-Math.log(min))*(x1-x0);
+                  const y = i => y0 + i*(y1-y0)/(rows.length-1);
+                  const ticks=[.5,.75,1,1.5,2];
+                  let out = `<rect data-chart-frame class="axis" x="${x0}" y="${y0-14}" width="${x1-x0}" height="${y1-y0+28}" fill="none"></rect>`;
+                  out += `<line class="reference" x1="${x(1)}" x2="${x(1)}" y1="${y0-14}" y2="${y1+14}"></line>`;
+                  ticks.forEach(t => { out += `<line class="axis" x1="${x(t)}" x2="${x(t)}" y1="${y1+14}" y2="${y1+19}"></line><text class="tick" x="${x(t)}" y="${H-22}" text-anchor="middle">${t}</text>`; });
+                  rows.forEach((d,i) => {
+                    const yy=y(i), color=d.significant ? 'var(--viz-series-1)' : 'var(--viz-series-3)';
+                    out += `<text class="label" x="${left-10}" y="${yy+4}" text-anchor="end">${d.name}</text>`;
+                    if (d.reference) {
+                      out += `<circle cx="${x(1)}" cy="${yy}" r="6" fill="var(--foreground)"></circle><text class="value" x="${x1+10}" y="${yy+4}">Reference</text>`;
+                    } else {
+                      out += `<line x1="${x(d.low)}" x2="${x(d.high)}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3"></line><line x1="${x(d.low)}" x2="${x(d.low)}" y1="${yy-6}" y2="${yy+6}" stroke="${color}" stroke-width="2"></line><line x1="${x(d.high)}" x2="${x(d.high)}" y1="${yy-6}" y2="${yy+6}" stroke="${color}" stroke-width="2"></line><circle cx="${x(d.or)}" cy="${yy}" r="6" fill="${color}"></circle><text class="value" x="${x1+10}" y="${yy+4}">${d.or.toFixed(2)}×</text>`;
+                    }
+                  });
+                  out += `<text class="axis-title" data-axis="x" x="${(x0+x1)/2}" y="${H-3}" text-anchor="middle">adjusted odds ratio for A grade (log scale)</text>`;
+                  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('height', H); svg.innerHTML=out;
+                }
+                new ResizeObserver(render).observe(root); render();
+              })();
+            </script>
+          </div>
+        </div>
+        <div class="chart-block">
+          <div id="adjusted-a-grade-probability" role="figure" aria-label="Adjusted probability of receiving an A grade at re-inspection for Manhattan, Bronx, and Queens">
+            <style>
+              #adjusted-a-grade-probability { font-family: ui-sans-serif, system-ui, sans-serif; color: var(--foreground); max-width: 760px; margin: 0 auto; }
+              #adjusted-a-grade-probability h2 { font-size: 19px; margin: 0 0 14px; }
+              #adjusted-a-grade-probability svg { display:block; width:100%; }
+              #adjusted-a-grade-probability .axis { stroke: var(--border); stroke-width: 1; }
+              #adjusted-a-grade-probability .grid { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 4; opacity: .65; }
+              #adjusted-a-grade-probability .label, #adjusted-a-grade-probability .tick { fill: var(--foreground); font-size: 12px; }
+              #adjusted-a-grade-probability .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
+            </style>
+            <h2>Adjusted Chance of an A Grade After Re-inspection</h2>
+            <svg id="plot" aria-label="Dot and whisker plot showing adjusted A grade probability and 95 percent confidence intervals"></svg>
+            <script>
+              (() => {
+                const root = document.getElementById('adjusted-a-grade-probability');
+                const rows = [
+                  {name:'Manhattan', value:.5668, low:.5385, high:.5950, reference:true},
+                  {name:'Bronx', value:.4950, low:.4460, high:.5440},
+                  {name:'Queens', value:.5110, low:.4809, high:.5411}
+                ];
+                const svg = root.querySelector('#plot');
+                function render() {
+                  const W=Math.max(330,svg.clientWidth||700), H=225, left=120, right=76, top=25, bottom=46, min=.40, max=.65;
+                  const x=v=>left+(v-min)/(max-min)*(W-left-right), y=i=>top+i*(H-top-bottom)/(rows.length-1);
+                  const ticks=[.40,.45,.50,.55,.60,.65];
+                  let out=`<rect class="axis" data-chart-frame x="${left}" y="${top-14}" width="${W-left-right}" height="${H-top-bottom+28}" fill="none"></rect>`;
+                  ticks.forEach(t=>{out+=`<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top-14}" y2="${H-bottom+14}"></line><text class="tick" x="${x(t)}" y="${H-22}" text-anchor="middle">${Math.round(t*100)}%</text>`;});
+                  rows.forEach((d,i)=>{const yy=y(i), color=d.reference?'var(--foreground)':'var(--viz-series-1)';out+=`<text class="label" x="${left-10}" y="${yy+4}" text-anchor="end">${d.name}</text><line x1="${x(d.low)}" x2="${x(d.high)}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3"></line><line x1="${x(d.low)}" x2="${x(d.low)}" y1="${yy-7}" y2="${yy+7}" stroke="${color}" stroke-width="2"></line><line x1="${x(d.high)}" x2="${x(d.high)}" y1="${yy-7}" y2="${yy+7}" stroke="${color}" stroke-width="2"></line><circle cx="${x(d.value)}" cy="${yy}" r="7" fill="${color}"></circle><text class="value" x="${W-right+9}" y="${yy+4}">${(d.value*100).toFixed(1)}%</text>`;});
+                  out+=`<text class="axis-title" data-axis="x" x="${(left+W-right)/2}" y="${H-3}" text-anchor="middle">model-adjusted probability of A grade · 95% confidence interval</text>`;
+                  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('height',H);svg.innerHTML=out;
+                }
+                new ResizeObserver(render).observe(root);render();
+              })();
+            </script>
+          </div>
+        </div>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr><th>Borough</th><th class="num">Adjusted odds ratio</th><th class="num">95% CI</th><th class="num">p-value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Bronx</td><td class="num">1.361</td><td class="num">1.065–1.740</td><td class="num">0.014</td></tr>
+          <tr><td>Brooklyn</td><td class="num">1.160</td><td class="num">0.963–1.399</td><td class="num">0.119</td></tr>
+          <tr><td>Queens</td><td class="num">1.271</td><td class="num">1.060–1.523</td><td class="num">0.009</td></tr>
+          <tr><td>Staten Island</td><td class="num">0.784</td><td class="num">0.538–1.144</td><td class="num">0.207</td></tr>
+        </tbody>
+      </table>
+      <p class="section-intro" style="margin-bottom:0;">
+        Prior inspection score matters too: every 10-point increase in the initial
+        score corresponds to <strong>1.22×</strong> higher odds of a B/C grade at
+        re-inspection (95% CI 1.16–1.28, p&lt;.001) — worse initial citations predict
+        worse re-inspection outcomes, as expected, and the borough effect holds
+        after controlling for it.
+      </p>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="wrap">
+      <p class="section-kicker">Why does the gap exist?</p>
+      <h2>Three mechanisms tested, all ruled out</h2>
+      <p class="section-intro">
+        <a href="investigate_borough_gap.py">investigate_borough_gap.py</a> tests three
+        candidate explanations against the full 50,000-row local extract. None of
+        them account for the gap.
+      </p>
+
+      <div class="mechanism-list">
+        <div class="mechanism-card">
+          <p class="verdict">✕ Ruled out</p>
+          <h3>Is the initial citation itself worse in the Bronx/Queens?</h3>
+          <p>
+            No, not meaningfully. Violation counts, critical-violation counts, and
+            inspection scores at the initial visit are nearly identical across
+            boroughs (1.29 violations/visit in Manhattan vs. 1.31–1.34 elsewhere).
+          </p>
+        </div>
+        <div class="mechanism-card">
+          <p class="verdict">✕ Ruled out</p>
+          <h3>Do Bronx/Queens restaurants have less time to fix the problem?</h3>
+          <p>
+            Ruled out — in the wrong direction, if anything. Bronx and Queens
+            restaurants are re-inspected <em>sooner</em> (median 124–127 days) than
+            Manhattan (146 days), and faster re-inspection correlates with a
+            slightly <em>lower</em> B/C rate, not a higher one (r=0.037).
+          </p>
+        </div>
+        <div class="mechanism-card">
+          <p class="verdict">✕ Ruled out</p>
+          <h3>Are they failing to fix the exact same violation?</h3>
+          <p>
+            Partially true (Bronx recurrence: 16.8% vs. Manhattan's 13.8%), but
+            doesn't explain the overall gap — within each borough, recurrence
+            barely moves the B/C rate. The gap shows up broadly, including at
+            restaurants with entirely new violations at re-inspection.
+          </p>
+        </div>
+      </div>
+
+      <p class="conclusion-callout">
+        None of the mechanisms visible in the public dataset — citation severity,
+        compliance-window length, or repeat-violation patterns — explain the gap.
+        It survives all three. The most likely remaining explanations (inspector
+        assignment, staffing levels per borough, per-inspector workload) aren't
+        published in this dataset — so the honest conclusion is "not explained by
+        anything observable here," not a confirmed cause. Full write-up in
+        <a href="INVESTIGATION.md">INVESTIGATION.md</a>.
+      </p>
+    </div>
+  </section>
+
+  <section id="data">
+    <div class="wrap">
+      <p class="section-kicker">The data</p>
+      <h2>NYC DOHMH Restaurant Inspection Results</h2>
+      <p class="section-intro">
+        Source: <a href="https://data.cityofnewyork.us/resource/43nn-pn8j.json" target="_blank" rel="noopener">NYC DOHMH Restaurant Inspection Results</a>
+        (295,054 rows). One row = one violation cited on one inspection — not one
+        restaurant, not even one visit. A restaurant cited for six things on one
+        visit produces six rows with the same <code>camis</code>, so any real
+        analysis has to group by restaurant and inspection date first, or it
+        double-counts. See <a href="NOTES.md">NOTES.md</a> for the full list of
+        data-quality gotchas (borough capitalization silently zeroing out API
+        queries, <code>dba</code> name variants, missing-not-null violation fields).
+      </p>
+
+      <div class="chart-block">
+        <div id="nyc-inspection-charts" role="figure" aria-label="Five charts summarizing 1,000 NYC restaurant inspection-result records">
+          <style>
+            #nyc-inspection-charts { font-family: ui-sans-serif, system-ui, sans-serif; color: var(--foreground); max-width: 1024px; margin: 0 auto; }
+            #nyc-inspection-charts h2 { font-size: 20px; margin: 0 0 4px; }
+            #nyc-inspection-charts .sub { margin: 0 0 16px; color: color-mix(in srgb, var(--foreground) 72%, transparent); font-size: 13px; }
+            #nyc-inspection-charts .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+            #nyc-inspection-charts .chart:last-child { grid-column: 1 / -1; }
+            #nyc-inspection-charts h3 { font-size: 15px; margin: 0 0 4px; }
+            #nyc-inspection-charts .note { font-size: 12px; margin: 0 0 8px; color: color-mix(in srgb, var(--foreground) 68%, transparent); min-height: 30px; }
+            #nyc-inspection-charts svg { display:block; width:100%; overflow:visible; }
+            #nyc-inspection-charts .axis { stroke: var(--border); stroke-width:1; }
+            #nyc-inspection-charts .label { fill: var(--foreground); font-size: 12px; }
+            #nyc-inspection-charts .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
+            #nyc-inspection-charts .muted { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
+            @media (max-width: 620px) { #nyc-inspection-charts .grid { grid-template-columns: 1fr; } #nyc-inspection-charts .chart:last-child { grid-column:auto; } }
+          </style>
+          <h2>NYC restaurant inspection sample</h2>
+          <p class="sub">1,000 raw inspection-result rows · counts are rows, not unique restaurants or visits</p>
+          <div class="grid">
+            <section class="chart"><h3>Records by borough</h3><p class="note">Manhattan accounts for the largest share of the sample.</p><svg id="borough"></svg></section>
+            <section class="chart"><h3>Most common cuisines</h3><p class="note">Top 8 self-reported cuisine descriptions.</p><svg id="cuisine"></svg></section>
+            <section class="chart"><h3>Critical-flag mix</h3><p class="note">Critical citations make up just over half of all rows.</p><svg id="critical"></svg></section>
+            <section class="chart"><h3>Inspection record dates</h3><p class="note">1900 entries are missing/sentinel dates and are shown separately.</p><svg id="years"></svg></section>
+            <section class="chart"><h3>Inspection action recorded</h3><p class="note">Most sample rows come from inspections where violations were cited.</p><svg id="action"></svg></section>
+          </div>
+          <script>
+          (() => {
+            const root = document.getElementById('nyc-inspection-charts');
+            const colors = ['var(--viz-series-1)', 'var(--viz-series-2)', 'var(--viz-series-3)', 'var(--viz-series-4)', 'var(--viz-series-5)', 'var(--viz-series-6)'];
+            const data = {
+              borough: [{label:'Bronx',value:94},{label:'Brooklyn',value:269},{label:'Manhattan',value:369},{label:'Queens',value:235},{label:'Staten Island',value:33}],
+              cuisine: [{label:'American',value:157},{label:'Chinese',value:100},{label:'Coffee/Tea',value:90},{label:'Pizza',value:68},{label:'Mexican',value:53},{label:'Latin American',value:46},{label:'Caribbean',value:39},{label:'Bakery / Desserts',value:36}],
+              critical: [{label:'Critical',value:528},{label:'Not Critical',value:435},{label:'Not Applicable',value:37}],
+              years: [{label:'2022',value:50},{label:'2023',value:167},{label:'2024',value:262},{label:'2025',value:287},{label:'2026',value:204}],
+              action: [{label:'Violations cited',value:935},{label:'Closed by DOHMH',value:33},{label:'Not recorded',value:16},{label:'No violations',value:10},{label:'Re-closed / re-opened',value:6}]
+            };
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+            function bars(id, values, opts={}) {
+              const svg = root.querySelector('#'+id), W = Math.max(300, svg.clientWidth || 460), row = opts.row || 29, left = opts.left || 120, right=42, top=8, H=top+values.length*row+25, max=Math.max(...values.map(d=>d.value));
+              svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('height', H);
+              let out=`<rect class="axis" data-chart-frame x="${left}" y="${top}" width="${W-left-right}" height="${values.length*row}" fill="none"/>`;
+              values.forEach((d,i)=>{ const y=top+i*row+5, w=(W-left-right-5)*d.value/max; out += `<text class="label" text-anchor="end" x="${left-8}" y="${y+13}">${esc(d.label)}</text><rect x="${left}" y="${y}" width="${w}" height="18" fill="${colors[i%colors.length]}"></rect><text class="value" x="${Math.min(W-right+4,left+w+5)}" y="${y+13}">${d.value}</text>`; });
+              out += `<text class="axis-title" data-axis="x" x="${left+(W-left-right)/2}" y="${H-4}" text-anchor="middle">inspection-result rows</text>`;
+              svg.innerHTML=out;
+            }
+            function donut() {
+              const svg=root.querySelector('#critical'), W=Math.max(300,svg.clientWidth||460), H=210, cx=112,cy=99,r=68,total=1000; let angle=-Math.PI/2, out='';
+              data.critical.forEach((d,i)=>{ const a=d.value/total*Math.PI*2, x1=cx+r*Math.cos(angle), y1=cy+r*Math.sin(angle), x2=cx+r*Math.cos(angle+a), y2=cy+r*Math.sin(angle+a), large=a>Math.PI?1:0; out+=`<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z" fill="${colors[i]}"></path>`; angle+=a; });
+              out += `<circle cx="${cx}" cy="${cy}" r="38" fill="var(--background)"></circle><text class="value" x="${cx}" y="${cy-3}" text-anchor="middle">1,000</text><text class="muted" x="${cx}" y="${cy+14}" text-anchor="middle">rows</text>`;
+              data.critical.forEach((d,i)=>{let y=54+i*36;out+=`<rect x="220" y="${y-11}" width="12" height="12" fill="${colors[i]}"></rect><text class="label" x="240" y="${y}">${esc(d.label)}</text><text class="value" text-anchor="end" x="${W-8}" y="${y}">${d.value} (${(d.value/10).toFixed(1)}%)</text>`}); svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('height',H);svg.innerHTML=out;
+            }
+            function draw(){ bars('borough',data.borough,{left:94}); bars('cuisine',data.cuisine,{left:132,row:27}); donut(); bars('years',data.years,{left:52,row:31}); bars('action',data.action,{left:132,row:31}); }
+            new ResizeObserver(draw).observe(root); draw();
+          })();
+          </script>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px; margin:32px 0 10px;">Modeling choices worth flagging</h3>
+      <ul class="limits-list">
+        <li>
+          Pre-2023 re-inspections are collapsed into a single "2022 or earlier"
+          category instead of one dummy per year — only 29 eligible observations
+          fall before 2023, too few to estimate stable year-by-year coefficients.
+          Year is a control here, not the variable of interest, so this doesn't
+          affect the borough estimates directly.
+        </li>
+        <li>
+          Cuisine categories with fewer than 20 observations are folded into
+          "Other / rare cuisine" to avoid unstable single-cell estimates.
+        </li>
+      </ul>
+
+      <h3 style="font-size:16px; margin:24px 0 10px;">Limitations</h3>
+      <ul class="limits-list">
+        <li>Single-pull sample, not the full 295k-row table — a fuller extract would let the year-bucketing above be un-collapsed.</li>
+        <li>Cross-sectional, not causal: a borough's worse odds could reflect inspector assignment, restaurant density, reporting lag, or unmeasured neighborhood factors, not something intrinsic to the borough itself.</li>
+        <li>Cuisine folding trades cuisine-level detail for model stability, the same way the year-bucketing does.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="reproduce">
+    <div class="wrap">
+      <p class="section-kicker">Reproduce this</p>
+      <h2>Run the analysis locally</h2>
+      <p class="section-intro">Requires Python 3 with pandas and numpy.</p>
+      <pre><code>pip install -r requirements.txt
+python3 analyze_reinspection_model.py          # borough-adjusted logistic model
+python3 investigate_borough_gap.py             # the mechanism hunt behind "why"
+python3 data/restaurant-analysis/download_data.py   # regenerate the 50k-row extract</code></pre>
+
+      <h3 style="font-size:16px; margin:28px 0 10px;">Contents</h3>
+      <ul class="contents-list">
+        <li><a href="NOTES.md">NOTES.md</a> — source data structure and gotchas.</li>
+        <li><a href="README.md">README.md</a> — full write-up of the finding.</li>
+        <li><a href="INVESTIGATION.md">INVESTIGATION.md</a> — the mechanism-hunt write-up.</li>
+        <li><a href="analyze_reinspection_model.py">analyze_reinspection_model.py</a> — the restaurant-clustered logistic regression.</li>
+        <li><a href="investigate_borough_gap.py">investigate_borough_gap.py</a> — tests the three candidate mechanisms.</li>
+        <li><a href="data/sample_1000.json">data/sample_1000.json</a> — 1,000-row raw sample.</li>
+        <li><a href="data/by_camis.json">data/by_camis.json</a> — derived summary keyed by restaurant ID.</li>
+        <li><a href="outputs/reinspection_model_results.txt">outputs/reinspection_model_results.txt</a> / <a href="outputs/deeper_mechanisms_results.txt">deeper_mechanisms_results.txt</a> — saved outputs.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    Data: NYC DOHMH Restaurant Inspection Results, via NYC Open Data. Built for
+    Pursuit's AI program.
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>
