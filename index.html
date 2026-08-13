@@ -387,10 +387,11 @@ python3 -m unittest discover -s tests -v             # run the test suite</code>
         <li><a href="analyze_reinspection_model.py">analyze_reinspection_model.py</a> — the restaurant-clustered logistic regression.</li>
         <li><a href="investigate_borough_gap.py">investigate_borough_gap.py</a> — round 1: tests three candidate mechanisms.</li>
         <li><a href="investigate_deeper_mechanisms.py">investigate_deeper_mechanisms.py</a> — round 2: density, reporting lag, inspector assignment.</li>
-        <li><a href="tests/test_regression.py">tests/test_regression.py</a> — automated tests (synthetic-data checks plus a regression test against saved results).</li>
+        <li><a href="tests/test_regression.py">tests/test_regression.py</a> / <a href="tests/test_borough_gap.py">tests/test_borough_gap.py</a> — automated tests for the shared statistics module and round 1's own logic.</li>
+        <li><a href=".github/workflows/tests.yml">.github/workflows/tests.yml</a> — runs the test suite on every push/PR.</li>
         <li><a href="data/sample_1000.json">data/sample_1000.json</a> — 1,000-row raw sample.</li>
         <li><a href="data/by_camis.json">data/by_camis.json</a> — derived summary keyed by restaurant ID.</li>
-        <li><a href="outputs/reinspection_model_results.txt">outputs/reinspection_model_results.txt</a> / <a href="outputs/deeper_mechanisms_results.txt">deeper_mechanisms_results.txt</a> — saved outputs.</li>
+        <li><a href="outputs/reinspection_model_results.txt">outputs/reinspection_model_results.txt</a> / <a href="outputs/borough_gap_results.txt">borough_gap_results.txt</a> / <a href="outputs/deeper_mechanisms_results.txt">deeper_mechanisms_results.txt</a> — saved outputs.</li>
       </ul>
     </div>
   </section>

@@ -94,10 +94,12 @@ pip install -r requirements.txt
 - [`investigate_borough_gap.py`](investigate_borough_gap.py) /
   [`investigate_deeper_mechanisms.py`](investigate_deeper_mechanisms.py) —
   the two-round mechanism hunt behind [`INVESTIGATION.md`](INVESTIGATION.md).
-- [`tests/test_regression.py`](tests/test_regression.py) — automated tests
-  for `regression.py`: synthetic-data checks that always run, plus a
-  regression test against the real dataset that's skipped automatically if
-  you haven't downloaded it yet.
+- [`tests/test_regression.py`](tests/test_regression.py) /
+  [`tests/test_borough_gap.py`](tests/test_borough_gap.py) — automated tests
+  for `regression.py` and `investigate_borough_gap.py` respectively; see
+  Testing below.
+- [`.github/workflows/tests.yml`](.github/workflows/tests.yml) — runs the
+  test suite on every push/PR once this repo has a GitHub remote.
 
 ## Running the analysis
 
@@ -116,12 +118,26 @@ and [`outputs/deeper_mechanisms_results.txt`](outputs/deeper_mechanisms_results.
 python3 -m unittest discover -s tests -v
 ```
 
-Runs a set of checks that don't need any data (does the logistic fit recover
-a known coefficient on synthetic data, does the cluster correction actually
-behave differently from a naive fit, does the pairing logic handle a small
-hand-built example correctly), plus — if you've run `download_data.py` so
-`data/restaurant-analysis/restaurant_data.json` exists locally — a regression
-test that the full pipeline still matches the numbers in `outputs/`.
+- [`tests/test_regression.py`](tests/test_regression.py) — the shared
+  statistics module: does the logistic fit recover a known coefficient on
+  synthetic data, does the cluster correction actually behave differently
+  from a naive fit, does the pairing logic handle a small hand-built example
+  correctly.
+- [`tests/test_borough_gap.py`](tests/test_borough_gap.py) — round 1's own
+  logic: the structural-violation classifier, the initial-visit violation
+  load aggregation, and the initial→re-inspection gap/recurrence pairing.
+
+Most tests need no data and always run. A few (marked with `skipUnless`) only
+run if you've generated `data/restaurant-analysis/restaurant_data.json` via
+`download_data.py`, and check the full pipeline against the numbers saved in
+`outputs/`.
+
+**CI:** [`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the
+full suite on every push and pull request once this repo has a GitHub
+remote — compiles every script, then runs the test suite above. It doesn't
+fetch `restaurant_data.json` (50MB, regenerable, gitignored on purpose), so
+the data-gated tests skip there by design; everything else runs for real on
+every push.
 
 ## Limitations
 
