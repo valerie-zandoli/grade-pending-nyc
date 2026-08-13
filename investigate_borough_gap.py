@@ -5,22 +5,24 @@ gap exists. This script looks for mechanism: does the initial citation itself
 look different in the Bronx/Queens (more violations, more critical flags,
 harder-to-fix violation types), does the compliance window differ, or do the
 same specific violations recur at re-inspection more often there?
+
+The two computations below (compute_initial_violation_load,
+compute_reinspection_gaps) are factored out of main() so tests/test_borough_gap.py
+can exercise them directly on small hand-built examples instead of only via
+the full 50,000-row extract.
 """
 from __future__ import annotations
 
 import json
-import warnings
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
-warnings.filterwarnings("ignore", message=".*encountered in matmul", category=RuntimeWarning)
-
-DATA = Path("data/restaurant-analysis/restaurant_data.json")
 INITIAL = "Cycle Inspection / Initial Inspection"
 REINSPECTION = "Cycle Inspection / Re-inspection"
 BOROUGHS = ["Manhattan", "Bronx", "Brooklyn", "Queens", "Staten Island"]
+
+DATA = Path("data/restaurant-analysis/restaurant_data.json")
 
 # Violation codes whose descriptions point at physical/structural problems
 # (pests, facility condition, equipment) rather than paperwork/procedural
@@ -42,17 +44,9 @@ def is_structural(description: str) -> bool:
     return any(keyword in text for keyword in STRUCTURAL_KEYWORDS)
 
 
-def main() -> None:
-    raw = pd.DataFrame(json.loads(DATA.read_text()))
-    raw = raw[raw["boro"].isin(BOROUGHS)].copy()
-    raw["inspection_date"] = pd.to_datetime(raw["inspection_date"])
-
-    cycle = raw[raw["inspection_type"].isin([INITIAL, REINSPECTION])].copy()
-
-    # --- 1. Violation load at the initial inspection: how many distinct
-    # violation codes did the visit get cited for, and what fraction were
-    # "critical"? (Row-level -> visit-level aggregation, since each row is
-    # one violation.)
+def compute_initial_violation_load(cycle: pd.DataFrame) -> pd.DataFrame:
+    """One row per initial-inspection visit: how many violations, how many
+    critical, how many structural/physical-condition, and the score."""
     initial_rows = cycle[cycle["inspection_type"] == INITIAL].copy()
     initial_rows["is_critical"] = initial_rows["critical_flag"] == "Critical"
     initial_rows["is_structural"] = initial_rows["violation_description"].apply(is_structural)
@@ -68,22 +62,14 @@ def main() -> None:
         .reset_index()
     )
     visit_load["score"] = pd.to_numeric(visit_load["score"], errors="coerce")
-
-    print("=== Initial-inspection violation load by borough ===")
-    print(
-        visit_load.groupby("boro")[["n_violations", "n_critical", "n_structural", "score"]]
-        .mean()
-        .round(2)
-        .reindex(BOROUGHS)
-    )
-    print(
-        "\nShare of initial visits with >=1 structural/physical-condition violation "
-        "(pests, temperature control, facility condition):"
-    )
     visit_load["any_structural"] = visit_load["n_structural"] > 0
-    print(visit_load.groupby("boro")["any_structural"].mean().round(3).reindex(BOROUGHS))
+    return visit_load
 
-    # --- 2. Compliance window: days between initial and re-inspection.
+
+def compute_reinspection_gaps(cycle: pd.DataFrame) -> pd.DataFrame:
+    """One row per re-inspection paired to its most recent prior initial
+    inspection: days between visits, grade, and whether any violation code
+    cited at the initial visit recurs at re-inspection."""
     visit = (
         cycle.sort_values("inspection_date")
         .groupby(["camis", "inspection_date", "inspection_type"], as_index=False)
@@ -92,7 +78,6 @@ def main() -> None:
     visit["score"] = pd.to_numeric(visit["score"], errors="coerce")
 
     gaps = []
-    initial_violation_codes = {}
     for camis, group in cycle.groupby("camis", sort=False):
         codes_by_visit = (
             group[group["inspection_type"] == INITIAL]
@@ -129,8 +114,39 @@ def main() -> None:
                 )
 
     gap_df = pd.DataFrame(gaps)
+    if gap_df.empty:
+        return gap_df
     gap_df = gap_df[gap_df["borough"].isin(BOROUGHS)]
     gap_df = gap_df[(gap_df["days_to_reinspect"] >= 0) & (gap_df["days_to_reinspect"] <= 365)]
+    return gap_df
+
+
+def main() -> None:
+    raw = pd.DataFrame(json.loads(DATA.read_text()))
+    raw = raw[raw["boro"].isin(BOROUGHS)].copy()
+    raw["inspection_date"] = pd.to_datetime(raw["inspection_date"])
+
+    cycle = raw[raw["inspection_type"].isin([INITIAL, REINSPECTION])].copy()
+
+    # --- 1. Violation load at the initial inspection.
+    visit_load = compute_initial_violation_load(cycle)
+
+    print("=== Initial-inspection violation load by borough ===")
+    print(
+        visit_load.groupby("boro")[["n_violations", "n_critical", "n_structural", "score"]]
+        .mean()
+        .round(2)
+        .reindex(BOROUGHS)
+    )
+    print(
+        "\nShare of initial visits with >=1 structural/physical-condition violation "
+        "(pests, temperature control, facility condition):"
+    )
+    print(visit_load.groupby("boro")["any_structural"].mean().round(3).reindex(BOROUGHS))
+
+    # --- 2. Compliance window: days between initial and re-inspection, and
+    # whether the same violation code recurs.
+    gap_df = compute_reinspection_gaps(cycle)
 
     print("\n=== Days between initial inspection and re-inspection, by borough ===")
     print(
@@ -140,9 +156,7 @@ def main() -> None:
         .reindex(BOROUGHS)
     )
 
-    # --- 3. Do the SAME violation codes recur at re-inspection (the
-    # restaurant was cited for the identical problem again), and does that
-    # rate differ by borough?
+    # --- 3. Do the SAME violation codes recur at re-inspection?
     print("\n=== Share of re-inspections citing at least one violation code that also appeared at the initial visit ===")
     recur = gap_df.groupby("borough").apply(
         lambda d: pd.Series(
