@@ -126,6 +126,11 @@ python3 -m unittest discover -s tests -v
 - [`tests/test_borough_gap.py`](tests/test_borough_gap.py) — round 1's own
   logic: the structural-violation classifier, the initial-visit violation
   load aggregation, and the initial→re-inspection gap/recurrence pairing.
+- [`tests/test_supabase_load_data.py`](tests/test_supabase_load_data.py) —
+  the Supabase loader's `clean_row()` (column selection, score coercion).
+  No network or credentials needed; `supabase/load_data.py` imports
+  `dotenv`/`supabase` lazily inside `main()` specifically so this file
+  doesn't require `supabase/requirements.txt` to be installed.
 
 Most tests need no data and always run. A few (marked with `skipUnless`) only
 run if you've generated `data/restaurant-analysis/restaurant_data.json` via

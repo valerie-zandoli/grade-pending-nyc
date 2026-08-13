@@ -27,9 +27,6 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
-from supabase import create_client
-
 ROOT = Path(__file__).resolve().parent.parent
 BATCH_SIZE = 500
 
@@ -55,6 +52,11 @@ def clean_row(row: dict) -> dict:
 
 
 def main() -> None:
+    # Imported here, not at module load, so clean_row() (and its tests) don't
+    # require supabase/requirements.txt to be installed just to run.
+    from dotenv import load_dotenv
+    from supabase import create_client
+
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--sample", action="store_true", help="load data/sample_1000.json instead of the full extract")
     args = parser.parse_args()
