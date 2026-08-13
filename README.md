@@ -20,8 +20,8 @@ probability terms: a restaurant with average characteristics has roughly a
 distinguishable from Manhattan at this sample size — the effect isn't
 "outer boroughs vs. Manhattan," it's specific to the Bronx and Queens.
 
-See the [dashboard](README.md#dashboard) below for the full breakdown, or run
-`python3 analyze_reinspection_model.py` for the raw model output.
+See [`index.html`](index.html) for this same finding as a one-page site, or
+run `python3 analyze_reinspection_model.py` for the raw model output.
 
 ## Why does the gap exist?
 
