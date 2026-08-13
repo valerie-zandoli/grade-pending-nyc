@@ -1,25 +1,11 @@
 # Grade Pending NYC
 
-**Do restaurants in some NYC boroughs recover from a bad inspection worse than
-others — and is that a real borough effect, or just what you'd expect once you
-account for what kind of restaurant, how bad the initial citation was, and
-when it happened?**
+**57% of cited Manhattan restaurants re-grade to an A. In the Bronx and Queens,
+it's 50% — even after adjusting for how bad the citation was, cuisine, and
+timing.** That gap is a signal worth DOHMH's attention, not borough noise.
 
 A restaurant-clustered logistic regression on NYC DOHMH re-inspection outcomes,
 built for week 6 of Pursuit's AI program.
-
-## The question and why it matters
-
-A DOHMH letter grade isn't just a courtesy sticker — it's what a diner sees
-in the window before deciding whether to walk in, and a B or C at
-re-inspection means a restaurant that was already cited didn't fully fix the
-problem the first time. If that failure-to-recover rate differs by borough
-*after* controlling for how bad the initial citation was, that's not "some
-neighborhoods have worse restaurants" — it's a signal worth DOHMH's attention
-about whether follow-up support, inspector consistency, or compliance
-resources are unevenly distributed across boroughs. This analysis exists to
-separate that real, adjusted borough gap from the confounds (cuisine mix,
-initial severity, time period) that would otherwise explain it away.
 
 ## The finding
 
