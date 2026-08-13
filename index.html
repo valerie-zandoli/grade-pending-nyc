@@ -181,11 +181,11 @@
   <section id="why">
     <div class="wrap">
       <p class="section-kicker">Why does the gap exist?</p>
-      <h2>Three mechanisms tested, all ruled out</h2>
+      <h2>Six mechanisms tested across two rounds</h2>
       <p class="section-intro">
-        <a href="investigate_borough_gap.py">investigate_borough_gap.py</a> tests three
-        candidate explanations against the full 50,000-row local extract. None of
-        them account for the gap.
+        Round 1 (<a href="investigate_borough_gap.py">investigate_borough_gap.py</a>)
+        tests three candidate explanations against the full 50,000-row local
+        extract. None of them account for the gap.
       </p>
 
       <div class="mechanism-list">
@@ -220,14 +220,50 @@
         </div>
       </div>
 
-      <p class="conclusion-callout">
-        None of the mechanisms visible in the public dataset — citation severity,
-        compliance-window length, or repeat-violation patterns — explain the gap.
-        It survives all three. The most likely remaining explanations (inspector
-        assignment, staffing levels per borough, per-inspector workload) aren't
-        published in this dataset — so the honest conclusion is "not explained by
-        anything observable here," not a confirmed cause. Full write-up in
-        <a href="INVESTIGATION.md">INVESTIGATION.md</a>.
+      <p class="section-intro" style="margin: 24px 0 0;">
+        Round 2 (<a href="investigate_deeper_mechanisms.py">investigate_deeper_mechanisms.py</a>)
+        tests the three explanations round 1 couldn't reach:
+      </p>
+      <div class="mechanism-list" style="margin-top: 14px;">
+        <div class="mechanism-card" style="border-left: 3px solid var(--viz-series-4);">
+          <p class="verdict" style="color: var(--viz-series-4);">◐ Suggestive, not conclusive</p>
+          <h3>Does restaurant density explain the gap?</h3>
+          <p>
+            Adding a density proxy (restaurants per community board) shrinks both
+            borough effects below significance (Bronx p=.018→.358, Queens
+            p=.007→.076) — the strongest lead so far. But density is itself
+            correlated with being in Manhattan, so this could be a real
+            confound or just collinearity inflating the uncertainty.
+          </p>
+        </div>
+        <div class="mechanism-card" style="border-left: 3px solid var(--text-muted);">
+          <p class="verdict" style="color: var(--text-muted);">? Untestable with this data</p>
+          <h3>Does reporting lag explain the gap?</h3>
+          <p>
+            Not ruled out — genuinely unmeasurable here. The field that looked
+            like a publish date (<code>record_date</code>) is actually a
+            data-download timestamp (3 distinct values across 50,000 rows);
+            <code>grade_date</code> equals <code>inspection_date</code> on
+            every graded row.
+          </p>
+        </div>
+        <div class="mechanism-card" style="border-left: 3px solid var(--text-muted);">
+          <p class="verdict" style="color: var(--text-muted);">? Untestable with this data</p>
+          <h3>Does inspector assignment explain the gap?</h3>
+          <p>
+            Still untestable — all 31 fields in the extract were enumerated by
+            hand; none identify an inspector, team, or staffing level. DOHMH
+            doesn't publish this.
+          </p>
+        </div>
+      </div>
+
+      <p class="conclusion-callout" style="margin-top: 22px;">
+        Five of six candidate mechanisms are now addressed: three ruled out,
+        one suggestive-but-ambiguous (density), two confirmed untestable with
+        public data. Restaurant density is the strongest lead this analysis
+        has produced, but it stops at "worth a cleaner test," not "explains
+        the gap." Full write-up in <a href="INVESTIGATION.md">INVESTIGATION.md</a>.
       </p>
     </div>
   </section>
