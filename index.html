@@ -72,7 +72,7 @@
           <div id="borough-reinspection-odds" role="figure" aria-label="Adjusted odds ratios for receiving an A grade at cycle re-inspection, by borough relative to Manhattan">
             <style>
               #borough-reinspection-odds { font-family: ui-sans-serif, system-ui, sans-serif; color: var(--foreground); max-width: 760px; margin: 0 auto; }
-              #borough-reinspection-odds h2 { font-size: 19px; margin: 0 0 3px; }
+              #borough-reinspection-odds h3 { font-size: 19px; margin: 0 0 3px; }
               #borough-reinspection-odds p { margin: 0 0 13px; font-size: 13px; color: color-mix(in srgb, var(--foreground) 72%, transparent); }
               #borough-reinspection-odds svg { display: block; width: 100%; }
               #borough-reinspection-odds .axis { stroke: var(--border); stroke-width: 1; }
@@ -81,7 +81,7 @@
               #borough-reinspection-odds .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
               #borough-reinspection-odds .muted { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
             </style>
-            <h2>Odds of Restaurants in the Bronx and Queens Achieving an A Grade after a Violation Compared to Manhattan</h2>
+            <h3>Odds of Restaurants in the Bronx and Queens Achieving an A Grade after a Violation Compared to Manhattan</h3>
             <svg id="plot" aria-label="Forest plot of adjusted odds of A grade by borough"></svg>
             <script>
               (() => {
@@ -122,14 +122,14 @@
           <div id="adjusted-a-grade-probability" role="figure" aria-label="Adjusted probability of receiving an A grade at re-inspection for Manhattan, Bronx, and Queens">
             <style>
               #adjusted-a-grade-probability { font-family: ui-sans-serif, system-ui, sans-serif; color: var(--foreground); max-width: 760px; margin: 0 auto; }
-              #adjusted-a-grade-probability h2 { font-size: 19px; margin: 0 0 14px; }
+              #adjusted-a-grade-probability h3 { font-size: 19px; margin: 0 0 14px; }
               #adjusted-a-grade-probability svg { display:block; width:100%; }
               #adjusted-a-grade-probability .axis { stroke: var(--border); stroke-width: 1; }
               #adjusted-a-grade-probability .grid { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 4; opacity: .65; }
               #adjusted-a-grade-probability .label, #adjusted-a-grade-probability .tick { fill: var(--foreground); font-size: 12px; }
               #adjusted-a-grade-probability .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
             </style>
-            <h2>Adjusted Chance of an A Grade After Re-inspection</h2>
+            <h3>Adjusted Chance of an A Grade After Re-inspection</h3>
             <svg id="plot" aria-label="Dot and whisker plot showing adjusted A grade probability and 95 percent confidence intervals"></svg>
             <script>
               (() => {
@@ -287,11 +287,11 @@
         <div id="nyc-inspection-charts" role="figure" aria-label="Five charts summarizing 1,000 NYC restaurant inspection-result records">
           <style>
             #nyc-inspection-charts { font-family: ui-sans-serif, system-ui, sans-serif; color: var(--foreground); max-width: 1024px; margin: 0 auto; }
-            #nyc-inspection-charts h2 { font-size: 20px; margin: 0 0 4px; }
+            #nyc-inspection-charts h3 { font-size: 20px; margin: 0 0 4px; }
             #nyc-inspection-charts .sub { margin: 0 0 16px; color: color-mix(in srgb, var(--foreground) 72%, transparent); font-size: 13px; }
             #nyc-inspection-charts .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
             #nyc-inspection-charts .chart:last-child { grid-column: 1 / -1; }
-            #nyc-inspection-charts h3 { font-size: 15px; margin: 0 0 4px; }
+            #nyc-inspection-charts h4 { font-size: 15px; margin: 0 0 4px; font-weight: 600; }
             #nyc-inspection-charts .note { font-size: 12px; margin: 0 0 8px; color: color-mix(in srgb, var(--foreground) 68%, transparent); min-height: 30px; }
             #nyc-inspection-charts svg { display:block; width:100%; overflow:visible; }
             #nyc-inspection-charts .axis { stroke: var(--border); stroke-width:1; }
@@ -300,14 +300,14 @@
             #nyc-inspection-charts .muted { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
             @media (max-width: 620px) { #nyc-inspection-charts .grid { grid-template-columns: 1fr; } #nyc-inspection-charts .chart:last-child { grid-column:auto; } }
           </style>
-          <h2>NYC restaurant inspection sample</h2>
+          <h3>NYC restaurant inspection sample</h3>
           <p class="sub">1,000 raw inspection-result rows · counts are rows, not unique restaurants or visits</p>
           <div class="grid">
-            <section class="chart"><h3>Records by borough</h3><p class="note">Manhattan accounts for the largest share of the sample.</p><svg id="borough"></svg></section>
-            <section class="chart"><h3>Most common cuisines</h3><p class="note">Top 8 self-reported cuisine descriptions.</p><svg id="cuisine"></svg></section>
-            <section class="chart"><h3>Critical-flag mix</h3><p class="note">Critical citations make up just over half of all rows.</p><svg id="critical"></svg></section>
-            <section class="chart"><h3>Inspection record dates</h3><p class="note">1900 entries are missing/sentinel dates and are shown separately.</p><svg id="years"></svg></section>
-            <section class="chart"><h3>Inspection action recorded</h3><p class="note">Most sample rows come from inspections where violations were cited.</p><svg id="action"></svg></section>
+            <section class="chart"><h4>Records by borough</h4><p class="note">Manhattan accounts for the largest share of the sample.</p><svg id="borough"></svg></section>
+            <section class="chart"><h4>Most common cuisines</h4><p class="note">Top 8 self-reported cuisine descriptions.</p><svg id="cuisine"></svg></section>
+            <section class="chart"><h4>Critical-flag mix</h4><p class="note">Critical citations make up just over half of all rows.</p><svg id="critical"></svg></section>
+            <section class="chart"><h4>Inspection record dates</h4><p class="note">1900 entries are missing/sentinel dates and are shown separately.</p><svg id="years"></svg></section>
+            <section class="chart"><h4>Inspection action recorded</h4><p class="note">Most sample rows come from inspections where violations were cited.</p><svg id="action"></svg></section>
           </div>
           <script>
           (() => {
