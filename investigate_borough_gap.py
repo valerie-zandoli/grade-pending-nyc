@@ -14,6 +14,7 @@ the full 50,000-row extract.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -133,6 +134,8 @@ def compute_reinspection_gaps(cycle: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> None:
+    if not DATA.exists():
+        sys.exit(f"{DATA} not found. Regenerate it with data/restaurant-analysis/download_data.py.")
     raw = pd.DataFrame(json.loads(DATA.read_text()))
     raw = raw[raw["boro"].isin(BOROUGHS)].copy()
     raw["inspection_date"] = pd.to_datetime(raw["inspection_date"])

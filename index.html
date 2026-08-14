@@ -372,11 +372,12 @@
       <h2>Run the analysis locally</h2>
       <p class="section-intro">Requires Python 3 with pandas, numpy, and requests (for the downloader).</p>
       <pre><code>pip install -r requirements.txt
-python3 analyze_reinspection_model.py               # borough-adjusted logistic model
-python3 investigate_borough_gap.py                  # round 1 of the mechanism hunt
+python3 data/restaurant-analysis/download_data.py    # first: pulls the 50k-row extract these need
+python3 analyze_reinspection_model.py                # borough-adjusted logistic model
+python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt
 python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt
-python3 data/restaurant-analysis/download_data.py    # regenerate the 50k-row extract
 python3 -m unittest discover -s tests -v             # run the test suite</code></pre>
+      <p class="section-intro" style="margin-top: 10px;">All three exit with a clear message (not a traceback) if you skip the first step.</p>
 
       <h3 style="font-size:16px; margin:28px 0 10px;">Contents</h3>
       <ul class="contents-list">

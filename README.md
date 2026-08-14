@@ -104,10 +104,13 @@ pip install -r requirements.txt
 ## Running the analysis
 
 ```bash
-python3 analyze_reinspection_model.py        # the headline borough-adjusted model
-python3 investigate_borough_gap.py           # round 1 of the mechanism hunt
-python3 investigate_deeper_mechanisms.py     # round 2 of the mechanism hunt
+python3 data/restaurant-analysis/download_data.py    # first: pulls the 50k-row extract these need
+python3 analyze_reinspection_model.py                # the headline borough-adjusted model
+python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt
+python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt
 ```
+
+All three exit with a clear message (not a traceback) if you skip the first step.
 
 Results are also saved to [`outputs/reinspection_model_results.txt`](outputs/reinspection_model_results.txt)
 and [`outputs/deeper_mechanisms_results.txt`](outputs/deeper_mechanisms_results.txt).

@@ -5,6 +5,7 @@ patterns."""
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +26,8 @@ def report_boroughs(beta, se, columns, label):
 
 
 def main() -> None:
+    if not DATA.exists():
+        sys.exit(f"{DATA} not found. Regenerate it with data/restaurant-analysis/download_data.py.")
     raw = pd.DataFrame(json.loads(DATA.read_text()))
     raw = raw[raw["boro"] != "0"].copy()
 

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +14,8 @@ DATA = Path("data/restaurant-analysis/restaurant_data.json")
 
 
 def main() -> None:
+    if not DATA.exists():
+        sys.exit(f"{DATA} not found. Regenerate it with data/restaurant-analysis/download_data.py.")
     raw = pd.DataFrame(json.loads(DATA.read_text()))
     df = build_paired_dataset(raw)
 
