@@ -189,3 +189,10 @@ reach a browser.
 - Cuisine categories with fewer than 20 observations are folded into "Other"
   to avoid unstable single-cell estimates, which trades cuisine-level detail
   for model stability the same way the year-bucketing does.
+
+## License
+
+Code is [MIT licensed](LICENSE). The underlying data is [NYC DOHMH
+Restaurant Inspection Results](https://data.cityofnewyork.us/resource/43nn-pn8j.json),
+published by NYC Open Data under its own open-data terms — the MIT license
+here covers this repo's code, not the city's dataset.
