@@ -143,8 +143,10 @@ pip install -r requirements.txt
 - [`data/restaurant-analysis/download_data.py`](data/restaurant-analysis/download_data.py) —
   pulls the complete table (paginated, ~295k rows, bounded by a pinned
   `SNAPSHOT_CUTOFF` date for reproducibility — see Reproducing this above)
-  into `restaurant_data.json` (gitignored, ~270MB, too large to track;
-  regenerate locally with `python3 download_data.py` from that directory).
+  into `restaurant_data.json` in that same directory (gitignored, ~270MB,
+  too large to track; regenerate with `python3 data/restaurant-analysis/download_data.py`
+  from the repo root, same as "Running the analysis" below — the script
+  writes next to itself regardless of where you run it from).
 - [`regression.py`](regression.py) — the shared statistics module: the
   initial→re-inspection pairing logic, the hand-rolled IRLS logistic fit, and
   the restaurant-clustered standard errors. Every script below imports it

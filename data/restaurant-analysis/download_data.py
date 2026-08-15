@@ -1,6 +1,9 @@
 import json
+from pathlib import Path
 
 import requests
+
+OUTPUT_PATH = Path(__file__).resolve().parent / "restaurant_data.json"
 
 # NYC DOHMH Restaurant Inspection Results -- a live, continuously-updated
 # feed, not a static file. Without a date filter, re-running this at a later
@@ -35,34 +38,34 @@ APP_TOKEN = ""
 PAGE_SIZE = 50000
 
 headers = {
-	"X-App-Token": APP_TOKEN
+    "X-App-Token": APP_TOKEN
 }
 
 all_rows = []
 offset = 0
 while True:
-	params = {
-		"$limit": PAGE_SIZE,
-		"$offset": offset,
-		"$where": f"inspection_date <= '{SNAPSHOT_CUTOFF}'",
-		# A stable total order so paginated $offset requests neither skip
-		# nor duplicate rows across pages (Socrata's default order isn't
-		# guaranteed stable otherwise). camis + inspection_date alone
-		# aren't unique -- one inspection visit cites multiple
-		# violation_codes as separate rows -- so violation_code is
-		# included to fully disambiguate.
-		"$order": "camis, inspection_date, violation_code",
-	}
-	response = requests.get(API_ENDPOINT, headers=headers, params=params)
-	response.raise_for_status()
-	page = response.json()
-	all_rows.extend(page)
-	print(f"  fetched {len(all_rows)} rows so far (offset {offset})...")
-	if len(page) < PAGE_SIZE:
-		break
-	offset += PAGE_SIZE
+    params = {
+        "$limit": PAGE_SIZE,
+        "$offset": offset,
+        "$where": f"inspection_date <= '{SNAPSHOT_CUTOFF}'",
+        # A stable total order so paginated $offset requests neither skip
+        # nor duplicate rows across pages (Socrata's default order isn't
+        # guaranteed stable otherwise). camis + inspection_date alone
+        # aren't unique -- one inspection visit cites multiple
+        # violation_codes as separate rows -- so violation_code is
+        # included to fully disambiguate.
+        "$order": "camis, inspection_date, violation_code",
+    }
+    response = requests.get(API_ENDPOINT, headers=headers, params=params)
+    response.raise_for_status()
+    page = response.json()
+    all_rows.extend(page)
+    print(f"  fetched {len(all_rows)} rows so far (offset {offset})...")
+    if len(page) < PAGE_SIZE:
+        break
+    offset += PAGE_SIZE
 
-with open("restaurant_data.json", "w") as f:
-	json.dump(all_rows, f)
+with open(OUTPUT_PATH, "w") as f:
+    json.dump(all_rows, f)
 
-print(f"Finished! {len(all_rows)} total rows.")
+print(f"Finished! {len(all_rows)} total rows, written to {OUTPUT_PATH}.")
