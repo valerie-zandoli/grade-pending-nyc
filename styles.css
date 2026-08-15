@@ -86,6 +86,16 @@ nav.site-nav .wrap {
   overflow-x: auto;
 }
 
+@media (max-width: 620px) {
+  /* Below this width the nav's links can exceed the viewport and need a
+     horizontal scroll to reach "The data" / "Reproduce" -- fade the right
+     edge so that's visible rather than looking like the list just ends. */
+  nav.site-nav .wrap {
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+  }
+}
+
 nav.site-nav a {
   font-size: 13px;
   color: var(--text-secondary);
