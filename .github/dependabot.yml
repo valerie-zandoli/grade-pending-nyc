@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # Root requirements.txt (pandas, numpy, requests) -- these are pinned
+  # to exact versions deliberately, for reproducibility (see README.md's
+  # "Reproducing this" section). Pinned does not mean "never updated" --
+  # Dependabot opens a PR when a newer version exists, so an update is a
+  # reviewed decision instead of either silent staleness or an
+  # accidental floating-version drift.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+
+  # supabase/requirements.txt -- separate directory, separate PRs, since
+  # it's optional groundwork nobody has to install for the core analysis.
+  - package-ecosystem: "pip"
+    directory: "/supabase"
+    schedule:
+      interval: "monthly"
+
+  # actions/checkout, actions/setup-python in .github/workflows/tests.yml.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

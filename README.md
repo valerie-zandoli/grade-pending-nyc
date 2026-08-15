@@ -211,7 +211,18 @@ full suite on every push and pull request once this repo has a GitHub
 remote — compiles every script, then runs the test suite above. It doesn't
 fetch `restaurant_data.json` (~270MB, regenerable, gitignored on purpose), so
 the data-gated tests skip there by design; everything else runs for real on
-every push.
+every push. CI runs on Python 3.11; local development was on 3.9 —
+both `pandas==2.3.3` and `numpy==2.0.2` declare `>=3.9` support and ship
+wheels for both, but this hasn't been verified by an actual 3.11 run
+outside CI itself.
+
+**Keeping dependencies current:** [`.github/dependabot.yml`](.github/dependabot.yml)
+checks monthly for newer versions of the pinned packages (root and
+`supabase/` `requirements.txt`) and the GitHub Actions used in CI, opening a
+PR for each rather than either silently drifting or floating unpinned.
+Pinning exact versions was a deliberate reproducibility choice (see
+Reproducing this above) — Dependabot makes "pinned" mean "a reviewed
+decision to update," not "frozen forever."
 
 ## Supabase (groundwork, not yet live)
 
