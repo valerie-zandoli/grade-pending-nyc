@@ -36,7 +36,7 @@ def main() -> None:
     print("=" * 72)
 
     # Density proxy: count of distinct restaurants per community board in the
-    # full 50k-row extract. Not true population density (no land-area or
+    # full local extract. Not true population density (no land-area or
     # foot-traffic data is published here) but the best density signal this
     # dataset can support.
     density = (
@@ -61,7 +61,7 @@ def main() -> None:
     X0, cols0 = design_matrix(df)
     y = df["b_or_c"].to_numpy(float)
     beta0, se0, cov0, g0, n0 = fit_clustered_logit(X0, y, df["camis"])
-    report_boroughs(beta0, se0, cols0, "Baseline model (no density term), same covariates as analyze_reinspection_model.py:")
+    result0 = report_boroughs(beta0, se0, cols0, "Baseline model (no density term), same covariates as analyze_reinspection_model.py:")
 
     X1, cols1 = design_matrix(df, extra_cols=["log_density"])
     beta1, se1, cov1, g1, n1 = fit_clustered_logit(X1, y, df["camis"])
@@ -70,12 +70,15 @@ def main() -> None:
     print("\nDensity effect itself:")
     print(density_row[["odds_ratio", "ci_low", "ci_high", "p_value"]].to_string(index=False, float_format=lambda x: f"{x:.3f}"))
 
-    bronx_before = np.exp(beta0[cols0.index("borough_Bronx")])
-    bronx_after = np.exp(beta1[cols1.index("borough_Bronx")])
-    queens_before = np.exp(beta0[cols0.index("borough_Queens")])
-    queens_after = np.exp(beta1[cols1.index("borough_Queens")])
-    print(f"\nBronx OR: {bronx_before:.3f} -> {bronx_after:.3f} after adding density (p .018 -> .358)")
-    print(f"Queens OR: {queens_before:.3f} -> {queens_after:.3f} after adding density (p .007 -> .076)")
+    def p_for(result, term):
+        return float(result.loc[result.term == term, "p_value"].iloc[0])
+
+    bronx_before, bronx_after = np.exp(beta0[cols0.index("borough_Bronx")]), np.exp(beta1[cols1.index("borough_Bronx")])
+    queens_before, queens_after = np.exp(beta0[cols0.index("borough_Queens")]), np.exp(beta1[cols1.index("borough_Queens")])
+    bronx_p0, bronx_p1 = p_for(result0, "borough_Bronx"), p_for(result1, "borough_Bronx")
+    queens_p0, queens_p1 = p_for(result0, "borough_Queens"), p_for(result1, "borough_Queens")
+    print(f"\nBronx OR: {bronx_before:.3f} -> {bronx_after:.3f} after adding density (p {bronx_p0:.3f} -> {bronx_p1:.3f})")
+    print(f"Queens OR: {queens_before:.3f} -> {queens_after:.3f} after adding density (p {queens_p0:.3f} -> {queens_p1:.3f})")
     manhattan_density = df.loc[df.borough == "Manhattan", "board_restaurant_count"].median()
     other_density = df.loc[df.borough != "Manhattan", "board_restaurant_count"].median()
     print(
@@ -93,12 +96,12 @@ def main() -> None:
     print("MECHANISM 2: REPORTING LAG (inspection -> public record)")
     print("=" * 72)
     rd = pd.to_datetime(raw["record_date"])
-    print(f"\nDistinct record_date values in the 50k-row extract: {rd.nunique()}")
+    print(f"\nDistinct record_date values in the {len(raw):,}-row extract: {rd.nunique()}")
     print(rd.value_counts().to_string())
     print(
-        "\nrecord_date is a data-pull timestamp (when this API snapshot was taken),"
-        " not a per-inspection publication date -- it takes only 3 distinct values"
-        " across 50,000 rows. It cannot measure reporting lag."
+        f"\nrecord_date is a data-pull timestamp (when this API snapshot was taken),"
+        f" not a per-inspection publication date -- it takes only {rd.nunique()} distinct"
+        f" values across {len(raw):,} rows. It cannot measure reporting lag."
     )
     gd = pd.to_datetime(raw["grade_date"], errors="coerce")
     idate = pd.to_datetime(raw["inspection_date"])

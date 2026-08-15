@@ -188,21 +188,21 @@ class TestFullPipelineRegression(unittest.TestCase):
         cls.columns = columns
 
     def test_sample_size_matches_saved_baseline(self):
-        self.assertEqual(self.n, 3921)
-        self.assertEqual(self.g, 3462)
+        self.assertEqual(self.n, 14414)
+        self.assertEqual(self.g, 11095)
 
     def test_borough_odds_ratios_match_saved_baseline(self):
         odds = dict(zip(self.columns, np.exp(self.beta)))
-        self.assertAlmostEqual(odds["borough_Bronx"], 1.361, places=2)
-        self.assertAlmostEqual(odds["borough_Queens"], 1.271, places=2)
-        self.assertAlmostEqual(odds["borough_Brooklyn"], 1.160, places=2)
-        self.assertAlmostEqual(odds["borough_Staten Island"], 0.784, places=2)
+        self.assertAlmostEqual(odds["borough_Bronx"], 1.124, places=2)
+        self.assertAlmostEqual(odds["borough_Queens"], 1.107, places=2)
+        self.assertAlmostEqual(odds["borough_Brooklyn"], 0.979, places=2)
+        self.assertAlmostEqual(odds["borough_Staten Island"], 0.864, places=2)
 
     def test_saved_output_file_is_current(self):
         self.assertTrue(SAVED_RESULTS.exists())
         text = SAVED_RESULTS.read_text()
-        self.assertIn("Eligible paired re-inspections: 3921", text)
-        self.assertIn("Unique restaurants (clusters): 3462", text)
+        self.assertIn("Eligible paired re-inspections: 14414", text)
+        self.assertIn("Unique restaurants (clusters): 11095", text)
 
 
 if __name__ == "__main__":

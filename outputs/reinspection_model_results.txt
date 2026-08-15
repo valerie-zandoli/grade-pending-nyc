@@ -1,19 +1,19 @@
-Eligible paired re-inspections: 3921
-Unique restaurants (clusters): 3462
-B/C outcome rate: 46.2%
+Eligible paired re-inspections: 14414
+Unique restaurants (clusters): 11095
+B/C outcome rate: 32.1%
 
 Borough odds ratios, relative to Manhattan (adjusted for prior score, cuisine, and re-inspection year):
       borough  odds_ratio  ci_low  ci_high  p_value
-        Bronx       1.361   1.065    1.740    0.014
-     Brooklyn       1.160   0.963    1.399    0.119
-       Queens       1.271   1.060    1.523    0.009
-Staten Island       0.784   0.538    1.144    0.207
+        Bronx       1.124   0.974    1.297    0.110
+     Brooklyn       0.979   0.881    1.087    0.686
+       Queens       1.107   0.998    1.228    0.056
+Staten Island       0.864   0.702    1.062    0.164
 
 Prior-score effect (per 10 points):
  odds_ratio  ci_low  ci_high  p_value
-      1.217   1.157    1.281    0.000
+      1.199   1.166    1.234    0.000
 
 Standardized predicted probability of an A grade at re-inspection:
-Manhattan: 0.5668 (0.5385, 0.5950)
-Bronx: 0.4950 (0.4460, 0.5440)
-Queens: 0.5110 (0.4809, 0.5411)
+Manhattan: 0.6847 (0.6709, 0.6985)
+Bronx: 0.6604 (0.6342, 0.6866)
+Queens: 0.6636 (0.6475, 0.6797)
