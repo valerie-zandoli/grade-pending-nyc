@@ -46,7 +46,7 @@ useful finding on its own even though it doesn't explain a borough gap.
 Recurring the identical violation code at re-inspection is common
 everywhere (63–76% of re-inspections across boroughs) and **strongly
 predicts a B/C outcome within every borough** — in Queens, 41% B/C when a
-code recurs vs. 14% when it doesn't; similar 3x gaps hold in every other
+code recurs vs. 14% when it doesn't; similar 3× gaps hold in every other
 borough. That's a substantive result about what predicts re-grade failure
 generally. But it doesn't explain a *borough* effect: recurrence rates are
 close enough across boroughs (Manhattan 71.7%, Bronx 75.0%, Queens 75.6%,
