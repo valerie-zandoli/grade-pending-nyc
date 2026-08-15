@@ -133,10 +133,11 @@ for the uncorrected number; it isn't evidence the effect is nearly real.
 
 ## A specification check, held to the same standard
 
-Everything above tests whether *other variables* explain the gap. A
-separate question: is the main model's functional form — a linear score
-effect, a constant borough effect across score levels — actually right?
-Loosening both against the complete dataset:
+[`check_model_specification.py`](check_model_specification.py) tests
+whether the main model's functional form — a linear score effect, a
+constant borough effect across score levels — is actually right, rather
+than whether other variables explain the gap. Run it with
+`python3 check_model_specification.py` against the complete dataset:
 
 - **Nonlinearity in score.** Adding a squared `initial_score` term to the
   main model: OR=0.985, p=.004. Real and significant — the relationship
@@ -148,12 +149,14 @@ Loosening both against the complete dataset:
   this says a Queens restaurant with a clean initial inspection
   (score=0) looks *better* than Manhattan in this specification (OR≈0.84),
   and one with a bad initial inspection (score=40) looks *worse*
-  (OR≈1.22) — crossing from favorable to unfavorable right around the
-  data's median score (25). Both borough *main effects* in this expanded
-  model — now meaning "at score=0," not "on average" — stay
-  non-significant (Bronx p=.263, Queens p=.107), so this doesn't overturn
-  the "no significant uniform gap" conclusion above; it says that if a
-  gap exists, it isn't uniform.
+  (OR≈1.22) — crossing from favorable to unfavorable at score≈19, which
+  is below the paired dataset's median score of 25. So slightly more than
+  half of the paired observations already sit on the "Queens looks worse"
+  side of that crossing point, not evenly split around it. Both borough
+  *main effects* in this expanded model — now meaning "at score=0," not
+  "on average" — stay non-significant (Bronx p=.263, Queens p=.107), so
+  this doesn't overturn the "no significant uniform gap" conclusion above;
+  it says that if a gap exists, it isn't uniform.
 
 Read this with the same caution as the multiple-comparisons note just
 above, more so: this is now a fourth and fifth specification tried against

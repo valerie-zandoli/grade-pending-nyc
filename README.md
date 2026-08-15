@@ -154,6 +154,10 @@ pip install -r requirements.txt
 - [`investigate_borough_gap.py`](investigate_borough_gap.py) /
   [`investigate_deeper_mechanisms.py`](investigate_deeper_mechanisms.py) —
   the two-round mechanism hunt behind [`INVESTIGATION.md`](INVESTIGATION.md).
+- [`check_model_specification.py`](check_model_specification.py) — tests the
+  main model's functional-form assumptions (linear score effect, constant
+  borough effect); see INVESTIGATION.md's "A specification check, held to
+  the same standard."
 - [`tests/test_regression.py`](tests/test_regression.py) /
   [`tests/test_borough_gap.py`](tests/test_borough_gap.py) — automated tests
   for `regression.py` and `investigate_borough_gap.py` respectively; see
@@ -168,9 +172,10 @@ python3 data/restaurant-analysis/download_data.py    # first: pulls the complete
 python3 analyze_reinspection_model.py                # the headline borough-adjusted model (~15s)
 python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt (~25s)
 python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt (~15s)
+python3 check_model_specification.py                 # specification checks, see INVESTIGATION.md (~15s)
 ```
 
-All three exit with a clear message (not a traceback) if you skip the first step.
+All four exit with a clear message (not a traceback) if you skip the first step.
 None of them print anything while they're working (`investigate_borough_gap.py`
 in particular used to sit silent for 46 of its ~49 seconds against the
 complete dataset, purely from an accidental O(restaurants × visits) filter
