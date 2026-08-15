@@ -64,7 +64,7 @@ exact specification, Bronx does not); reporting lag and inspector
 assignment remain **untestable** with this public dataset — DOHMH doesn't
 publish the fields that would be needed. Given how small and marginal the
 underlying effect already is, none of this should be read as "explaining a
-gap" so much as "not finding anything that would make a already-marginal
+gap" so much as "not finding anything that would make an already-marginal
 signal look more real."
 
 ## Reproducing this
