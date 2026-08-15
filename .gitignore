@@ -2,7 +2,7 @@
 __pycache__/
 *.pyc
 
-# Regenerable via data/restaurant-analysis/download_data.py — 50MB, too
+# Regenerable via data/restaurant-analysis/download_data.py — ~270MB, too
 # large to track comfortably in git.
 data/restaurant-analysis/restaurant_data.json
 

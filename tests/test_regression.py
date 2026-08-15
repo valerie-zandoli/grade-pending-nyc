@@ -13,7 +13,7 @@ Two kinds of test here:
   - TestFullPipelineRegression re-runs the real analysis against
     data/restaurant-analysis/restaurant_data.json and checks the headline
     numbers against outputs/reinspection_model_results.txt. It's skipped
-    automatically when that (gitignored, ~50MB) file isn't present locally --
+    automatically when that (gitignored, ~270MB) file isn't present locally --
     regenerate it with data/restaurant-analysis/download_data.py to enable it.
 """
 from __future__ import annotations
@@ -120,7 +120,7 @@ class TestFitClusteredLogit(unittest.TestCase):
 
 class TestBuildPairedDataset(unittest.TestCase):
     """Checks the initial -> re-inspection pairing logic on a small,
-    hand-built example instead of the real 50MB extract."""
+    hand-built example instead of the real ~270MB extract."""
 
     def _row(self, camis, boro, cuisine, itype, date, score=None, grade=None):
         return {

@@ -30,7 +30,7 @@ jobs:
       - name: Run tests
         run: python3 -m unittest discover -s tests -v
         # data/restaurant-analysis/restaurant_data.json is gitignored
-        # (~50MB, regenerated via download_data.py) and isn't fetched in
+        # (~270MB, regenerated via download_data.py) and isn't fetched in
         # this workflow, so the tests that need it (TestFullPipelineRegression,
         # TestTemperatureCodesAreCaught) skip automatically here -- everything
         # else (the synthetic-data and hand-built-example tests, which are
