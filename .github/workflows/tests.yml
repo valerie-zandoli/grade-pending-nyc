@@ -25,7 +25,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Compile-check all scripts
-        run: python3 -m py_compile *.py tests/*.py
+        run: python3 -m py_compile *.py tests/*.py data/restaurant-analysis/*.py supabase/*.py
 
       - name: Run tests
         run: python3 -m unittest discover -s tests -v
