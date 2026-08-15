@@ -84,6 +84,7 @@
               #borough-reinspection-odds .label, #borough-reinspection-odds .tick { fill: var(--foreground); font-size: 12px; }
               #borough-reinspection-odds .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
               #borough-reinspection-odds .muted { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
+              #borough-reinspection-odds .axis-title { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
             </style>
             <h3>Odds of restaurants in the Bronx and Queens achieving an A grade after a violation, compared to Manhattan</h3>
             <svg id="borough-odds-plot" aria-label="Forest plot of adjusted odds of A grade by borough"></svg>
@@ -132,6 +133,7 @@
               #adjusted-a-grade-probability .grid { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 4; opacity: .65; }
               #adjusted-a-grade-probability .label, #adjusted-a-grade-probability .tick { fill: var(--foreground); font-size: 12px; }
               #adjusted-a-grade-probability .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
+              #adjusted-a-grade-probability .axis-title { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
             </style>
             <h3>Adjusted chance of an A grade after re-inspection</h3>
             <svg id="a-grade-probability-plot" aria-label="Dot and whisker plot showing adjusted A grade probability and 95 percent confidence intervals"></svg>
@@ -151,7 +153,7 @@
                   let out=`<rect class="axis" data-chart-frame x="${left}" y="${top-14}" width="${W-left-right}" height="${H-top-bottom+28}" fill="none"></rect>`;
                   ticks.forEach(t=>{out+=`<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top-14}" y2="${H-bottom+14}"></line><text class="tick" x="${x(t)}" y="${H-22}" text-anchor="middle">${Math.round(t*100)}%</text>`;});
                   rows.forEach((d,i)=>{const yy=y(i), color=d.reference?'var(--foreground)':'var(--viz-series-4)';out+=`<text class="label" x="${left-10}" y="${yy+4}" text-anchor="end">${d.name}</text><line x1="${x(d.low)}" x2="${x(d.high)}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3"></line><line x1="${x(d.low)}" x2="${x(d.low)}" y1="${yy-7}" y2="${yy+7}" stroke="${color}" stroke-width="2"></line><line x1="${x(d.high)}" x2="${x(d.high)}" y1="${yy-7}" y2="${yy+7}" stroke="${color}" stroke-width="2"></line><circle cx="${x(d.value)}" cy="${yy}" r="7" fill="${color}"></circle><text class="value" x="${W-right+9}" y="${yy+4}">${(d.value*100).toFixed(1)}%</text>`;});
-                  out+=`<text class="axis-title" data-axis="x" x="${(left+W-right)/2}" y="${H-3}" text-anchor="middle">model-adjusted probability of A grade · 95% confidence interval</text>`;
+                  out+=`<text class="axis-title" data-axis="x" x="${(left+W-right)/2}" y="${H-3}" text-anchor="middle">model-adjusted probability of A grade (95% CI)</text>`;
                   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('height',H);svg.innerHTML=out;
                 }
                 new ResizeObserver(render).observe(root);render();
@@ -312,6 +314,7 @@
             #nyc-inspection-charts .label { fill: var(--foreground); font-size: 12px; }
             #nyc-inspection-charts .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
             #nyc-inspection-charts .muted { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
+            #nyc-inspection-charts .axis-title { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
             @media (max-width: 620px) { #nyc-inspection-charts .grid { grid-template-columns: 1fr; } #nyc-inspection-charts .chart:last-child { grid-column:auto; } }
           </style>
           <h3>NYC restaurant inspection sample</h3>
