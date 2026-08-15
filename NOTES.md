@@ -6,7 +6,25 @@ hunt.*
 
 Source: NYC DOHMH Restaurant Inspection Results
 `https://data.cityofnewyork.us/resource/43nn-pn8j.json`
-Full table: 295,054 rows. Sample pulled to `data/sample_1000.json` via `?$limit=1000`.
+Full table: 295,054 rows. `data/sample_1000.json` (`?$limit=1000`) is a small
+descriptive sample, used only for the illustrative charts under "The data" —
+not the extract the regression runs against.
+
+## How the analysis extract is pulled
+
+`data/restaurant-analysis/download_data.py` pulls the **complete table**
+(all ~295k rows, paginated), not a sample — an earlier version capped at
+50,000 rows with no date filter and no explicit sort order, which turned out
+to matter a lot: it wasn't reproducible (re-running it later silently pulled
+a different slice as the live feed grew), and when we tried fixing that by
+adding a deterministic sort, every ordering we could construct introduced
+real bias for this analysis's paired initial→re-inspection design —
+recency order right-censored the sample (recent initial inspections hadn't
+had time to get re-inspected yet, collapsing the paired sample by ~80% in
+testing); restaurant-ID order only selected long-tenured restaurants, since
+`camis` is assigned roughly chronologically. Pulling the whole table
+sidesteps the sampling question. `SNAPSHOT_CUTOFF` in that script pins the
+historical window so re-running it stays reproducible going forward.
 
 ## What one row is
 
