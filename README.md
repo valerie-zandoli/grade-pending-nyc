@@ -252,6 +252,13 @@ reach a browser.
   (p=.056 in the main model, p=.041–.099 depending on exact specification
   in round 2) and Bronx doesn't clear it (p=.110–.128). Read this as "a
   small, inconclusive signal," not as either "confirmed" or "disproven."
+- **No multiple-comparisons correction is applied**, and it would make the
+  above weaker still. The main model tests four boroughs against Manhattan
+  simultaneously; at an uncorrected α=.05 each, the naive chance of at
+  least one nominally "significant" result among four is ~18.5%, not 5%.
+  A Bonferroni-corrected threshold for four comparisons (α=.0125) is not
+  cleared by Bronx *or* Queens. Queens's p=.056 shouldn't be read as
+  "almost significant" so much as "unremarkable under multiple testing."
 - Cross-sectional, not causal: any real (or apparent) borough effect could
   reflect inspector assignment, restaurant density, reporting lag, or
   unmeasured neighborhood factors, not something intrinsic to the borough

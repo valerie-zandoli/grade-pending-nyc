@@ -122,3 +122,11 @@ none of the available public data makes look any more real.** Inspector
 assignment and staffing levels remain the one class of explanation this
 public dataset genuinely cannot rule in or out, for a signal that may not
 need explaining in the first place.
+
+One more reason not to over-read Queens's p=.056: it's one of four
+simultaneous borough comparisons in the main model, none corrected for
+multiple testing. At an uncorrected α=.05 per comparison, the chance of at
+least one nominally "significant" result among four by chance alone is
+~18.5%, not 5% — and a Bonferroni-corrected threshold for four comparisons
+(α=.0125) isn't cleared by Bronx or Queens. "Borderline" is the right word
+for the uncorrected number; it isn't evidence the effect is nearly real.
