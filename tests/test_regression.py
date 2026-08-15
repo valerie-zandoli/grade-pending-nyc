@@ -10,11 +10,12 @@ Two kinds of test here:
     the cluster correction actually behave differently from a naive fit, does
     the initial->re-inspection pairing logic handle a hand-built mini example
     correctly.
-  - TestFullPipelineRegression re-runs the real analysis against
-    data/restaurant-analysis/restaurant_data.json and checks the headline
-    numbers against outputs/reinspection_model_results.txt. It's skipped
+  - TestFullPipelineRegression and TestModelSpecificationCheck re-run the
+    real analysis against data/restaurant-analysis/restaurant_data.json and
+    check the headline numbers, and the specification-check numbers cited
+    in INVESTIGATION.md, against saved baselines. Both are skipped
     automatically when that (gitignored, ~270MB) file isn't present locally --
-    regenerate it with data/restaurant-analysis/download_data.py to enable it.
+    regenerate it with data/restaurant-analysis/download_data.py to enable them.
 """
 from __future__ import annotations
 
@@ -203,6 +204,42 @@ class TestFullPipelineRegression(unittest.TestCase):
         text = SAVED_RESULTS.read_text()
         self.assertIn("Eligible paired re-inspections: 14414", text)
         self.assertIn("Unique restaurants (clusters): 11095", text)
+
+
+@unittest.skipUnless(DATA.exists(), f"regenerate {DATA} with data/restaurant-analysis/download_data.py to run this test")
+class TestModelSpecificationCheck(unittest.TestCase):
+    """Re-runs check_model_specification.py's nonlinear/interaction model
+    and checks it still matches the numbers cited in INVESTIGATION.md's
+    "A specification check, held to the same standard" section -- without
+    this, a future change to regression.py could silently drift a number
+    that document states as fact."""
+
+    @classmethod
+    def setUpClass(cls):
+        raw = pd.DataFrame(json.loads(DATA.read_text()))
+        df = build_paired_dataset(raw)
+        y = df["b_or_c"].to_numpy(float)
+        df["initial_score_10_sq"] = df["initial_score_10"] ** 2
+        df["borough_Bronx_x_score"] = (df["borough"] == "Bronx").astype(float) * df["initial_score_10"]
+        df["borough_Queens_x_score"] = (df["borough"] == "Queens").astype(float) * df["initial_score_10"]
+        extra = ["initial_score_10_sq", "borough_Bronx_x_score", "borough_Queens_x_score"]
+        X, columns = design_matrix(df, extra_cols=extra)
+        cls.beta, cls.se, cls.covariance, cls.g, cls.n = fit_clustered_logit(X, y, df["camis"])
+        cls.columns = columns
+        cls.median_score = df["initial_score_10"].median() * 10
+
+    def test_nonlinear_and_interaction_terms_match_saved_baseline(self):
+        odds = dict(zip(self.columns, np.exp(self.beta)))
+        self.assertAlmostEqual(odds["initial_score_10_sq"], 0.985, places=2)
+        self.assertAlmostEqual(odds["borough_Bronx_x_score"], 0.976, places=2)
+        self.assertAlmostEqual(odds["borough_Queens_x_score"], 1.099, places=2)
+
+    def test_queens_interaction_crosses_or_one_below_the_median_score(self):
+        queens_main = self.beta[self.columns.index("borough_Queens")]
+        queens_int = self.beta[self.columns.index("borough_Queens_x_score")]
+        crossover_score = -queens_main / queens_int * 10
+        self.assertAlmostEqual(crossover_score, 19.0, delta=0.5)
+        self.assertLess(crossover_score, self.median_score)
 
 
 if __name__ == "__main__":
