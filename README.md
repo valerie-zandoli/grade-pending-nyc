@@ -249,7 +249,9 @@ can't create an account or project for you):
    Supabase's client libraries until you actually want them).
 6. `python3 supabase/load_data.py --sample` to load the 1,000-row sample
    first and confirm the connection works, then `python3 supabase/load_data.py`
-   for the complete ~295k-row table.
+   for the complete ~295k-row table. Check your project's free-tier database
+   storage limit before the full load — the sample alone is enough to
+   confirm the schema and connection without using much of it.
 
 The loader deliberately uses the `service_role` key (needs write access); a
 future live site reading from this table would use the public `anon` key

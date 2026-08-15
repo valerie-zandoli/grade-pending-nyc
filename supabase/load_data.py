@@ -17,7 +17,13 @@ Setup:
      SUPABASE_KEY with the values from step 3. .env is gitignored.
   5. pip install -r supabase/requirements.txt
   6. python3 supabase/load_data.py --sample     (1,000 rows, fast, to check the connection)
-     python3 supabase/load_data.py              (the full 50k-row extract)
+     python3 supabase/load_data.py              (the complete ~295k-row extract)
+
+The complete extract is ~295k rows; check your Supabase project's free-tier
+database storage limit before loading it in full (supabase.com/pricing has
+the current number -- it changes, so it isn't repeated here). The --sample
+load is enough to confirm the schema and connection work without using much
+of that quota.
 """
 from __future__ import annotations
 

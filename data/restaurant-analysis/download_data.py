@@ -26,6 +26,11 @@ import requests
 SNAPSHOT_CUTOFF = "2026-08-13T23:59:59"
 
 API_ENDPOINT = "https://data.cityofnewyork.us/resource/43nn-pn8j.json"
+# Optional. Socrata throttles unauthenticated requests by IP more
+# aggressively than token'd ones; six requests for a one-off pull is fine
+# without one, but if you're re-running this repeatedly (development,
+# testing, a scheduled refresh), get a free token at
+# https://data.cityofnewyork.us/profile/app_tokens and paste it here.
 APP_TOKEN = ""
 PAGE_SIZE = 50000
 
