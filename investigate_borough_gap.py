@@ -1,15 +1,19 @@
-"""Why do Bronx/Queens restaurants re-grade worse than Manhattan?
+"""Do Bronx/Queens restaurants re-grade worse than Manhattan -- and why?
 
-The regression in analyze_reinspection_model.py establishes THAT an adjusted
-gap exists. This script looks for mechanism: does the initial citation itself
-look different in the Bronx/Queens (more violations, more critical flags,
-harder-to-fix violation types), does the compliance window differ, or do the
-same specific violations recur at re-inspection more often there?
+analyze_reinspection_model.py's regression against the complete dataset finds
+a modest borough effect that doesn't clear conventional significance (Queens
+p=.056, Bronx p=.110) -- smaller and weaker than an earlier 50,000-row sample
+suggested. This script looks for mechanism regardless, since knowing whether
+these candidate explanations move the needle is useful independent of where
+the headline estimate lands: does the initial citation itself look different
+in the Bronx/Queens (more violations, more critical flags, harder-to-fix
+violation types), does the compliance window differ, or do the same specific
+violations recur at re-inspection more often there?
 
 The two computations below (compute_initial_violation_load,
 compute_reinspection_gaps) are factored out of main() so tests/test_borough_gap.py
 can exercise them directly on small hand-built examples instead of only via
-the full 50,000-row extract.
+the full local extract.
 """
 from __future__ import annotations
 
@@ -34,7 +38,7 @@ DATA = Path("data/restaurant-analysis/restaurant_data.json")
 # real text ("Cold TCS food item held above 41 F", "Hot TCS food item not
 # held at or above 140 F") never contains the literal phrases "cold
 # holding"/"hot holding" that an earlier version of this list looked for --
-# checked against the full 50k-row extract, that missed ~93% of real
+# checked against the full local extract, that missed ~93% of real
 # temperature-control citations.
 STRUCTURAL_KEYWORDS = [
     "vermin", "mice", "rats", "roach", "pest", "evidence of", "harborage",

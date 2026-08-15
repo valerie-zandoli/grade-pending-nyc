@@ -1,8 +1,12 @@
 # Grade Pending NYC
 
-**57% of cited Manhattan restaurants re-grade to an A. In the Bronx and Queens,
-it's 50% — even after adjusting for how bad the citation was, cuisine, and
-timing.** That gap is a signal worth DOHMH's attention, not borough noise.
+**A 50,000-row sample suggested Manhattan restaurants re-grade to an A after
+a health-code violation at a significantly higher rate than the Bronx and
+Queens. Against the complete 295,048-row population, that gap shrinks by
+more than half and misses conventional statistical significance.** The
+apparent disparity looks like it was substantially a small-sample artifact —
+a finding about replication as much as about restaurant grades. See
+[Reproducing this](#reproducing-this) for how that was caught and fixed.
 
 A restaurant-clustered logistic regression on NYC DOHMH re-inspection outcomes,
 built during week 6 of enrollment in Pursuit's AI Native program.
@@ -10,61 +14,116 @@ built during week 6 of enrollment in Pursuit's AI Native program.
 > **This README is the canonical write-up.** [`index.html`](index.html) is the
 > same finding as a shareable one-page site (open it directly, or serve it
 > locally — see Contents below). [`INVESTIGATION.md`](INVESTIGATION.md) is the
-> technical appendix on *why* the gap exists. [`NOTES.md`](NOTES.md) is a data
-> reference, not a narrative. [`01ChatGradePending.md`](01ChatGradePending.md)
+> technical appendix on *why* an effect this size might exist. [`NOTES.md`](NOTES.md)
+> is a data reference, not a narrative. [`01ChatGradePending.md`](01ChatGradePending.md)
 > is a raw, unedited transcript of an earlier working session, kept for
 > process transparency — it's an archival log, not a maintained document, and
 > nothing in it should be treated as more current than what's written here.
 
 ## The finding
 
-On 3,921 paired initial→re-inspection visits since 2016 (3,462 unique
-restaurants), **Bronx (OR 1.36, 95% CI 1.07–1.74, p=.014) and Queens (OR
-1.27, 95% CI 1.06–1.52, p=.009) restaurants have significantly worse odds of
-landing a B or C grade at re-inspection than Manhattan restaurants**, holding
-prior inspection score, cuisine, and re-inspection year fixed. In predicted-
-probability terms: a restaurant with average characteristics has roughly a
-57% chance of re-grading to an A in Manhattan, versus ~50% in Queens and
-~50% in the Bronx. Brooklyn and Staten Island are not statistically
-distinguishable from Manhattan at this sample size — the effect isn't
-"outer boroughs vs. Manhattan," it's specific to the Bronx and Queens.
+On 14,414 paired initial→re-inspection visits from the complete NYC DOHMH
+extract (11,095 unique restaurants), **Bronx (OR 1.12, 95% CI 0.97–1.30,
+p=.110) and Queens (OR 1.11, 95% CI 1.00–1.23, p=.056) restaurants show a
+small tendency toward worse odds of a B or C grade at re-inspection than
+Manhattan restaurants**, holding prior inspection score, cuisine, and
+re-inspection year fixed — but neither clears conventional significance
+(Queens sits right at the boundary; Bronx doesn't). In predicted-probability
+terms: a restaurant with average characteristics has roughly a 68% chance of
+re-grading to an A in Manhattan, versus ~66% in Queens and the Bronx — a
+2-point gap, not a 7-point one. Brooklyn (OR 0.98, p=.686) and Staten Island
+(OR 0.86, p=.164) remain indistinguishable from Manhattan, as before.
+
+**This is a materially weaker result than an earlier version of this
+analysis reported.** A 50,000-row sample — pulled with no date filter and no
+explicit sort order, effectively an arbitrary slice of the table — showed a
+larger, clearly significant gap: Bronx OR 1.36 (p=.014), Queens OR 1.27
+(p=.009), roughly 57% vs. 50%. That result did not hold up once the same
+model was run against the complete dataset instead of a sample. See
+[Reproducing this](#reproducing-this) below for the full story: why the
+original sample wasn't reproducible, why the deterministic sampling
+strategies tried next were each biased in ways that mattered specifically
+for this paired-visit design, and why pulling the whole table was the fix
+that made the result stop moving around.
 
 See [`index.html`](index.html) for this same finding as a one-page site, or
 run `python3 analyze_reinspection_model.py` for the raw model output.
 
-## Why does the gap exist?
+## Why might an effect this size exist?
 
 [`INVESTIGATION.md`](INVESTIGATION.md) tests six candidate mechanisms across
-two rounds. Round 1 rules out worse initial citations, a shorter compliance
-window before re-inspection, and repeat violations of the same code — the
-gap survives all three. Round 2 tests the three explanations round 1
-couldn't reach: restaurant density is the strongest lead so far (adding it
-attenuates both borough effects to non-significance, though it's collinear
-with borough itself, so this is suggestive rather than conclusive);
-reporting lag and inspector assignment turn out to be **untestable** with
-this public dataset — DOHMH doesn't publish the fields that would be needed.
+two rounds, run against the complete dataset. Round 1 finds no meaningful
+difference in initial-citation severity or compliance-window length between
+boroughs; it does find that recurring the same violation code at
+re-inspection strongly predicts a B/C outcome within every borough — a
+real, useful signal about grading generally, though recurrence *rates*
+don't differ enough between boroughs to explain a borough-specific gap on
+their own. Round 2's restaurant-density proxy attenuates both borough
+effects further (Queens sits right at the edge of significance depending on
+exact specification, Bronx does not); reporting lag and inspector
+assignment remain **untestable** with this public dataset — DOHMH doesn't
+publish the fields that would be needed. Given how small and marginal the
+underlying effect already is, none of this should be read as "explaining a
+gap" so much as "not finding anything that would make a already-marginal
+signal look more real."
+
+## Reproducing this
+
+**An earlier version of `download_data.py` pulled 50,000 rows with
+`$limit=50000` and no date filter or sort order.** That has two problems,
+one about reproducibility and one about validity:
+
+1. **Not reproducible.** Socrata doesn't guarantee stable row ordering for
+   `$offset`-based pagination without an explicit `$order`, and the feed is
+   live — re-running that script later silently returns a different slice
+   than whoever ran it before you got. The specific 57%-vs-50%,
+   clearly-significant result quoted in early versions of this README
+   can't be regenerated by running the documented reproduction steps.
+2. **The fix that seemed obvious made things worse.** Pinning a
+   deterministic `$order` to solve (1) requires *some* sort key, and every
+   one available here introduces real sampling bias for a paired
+   initial→re-inspection design: ordering by `inspection_date DESC`
+   right-censors the sample — recent initial inspections haven't had time
+   to get re-inspected yet, which collapsed the paired sample from 3,921 to
+   779 re-inspections in testing and inflated every p-value into
+   insignificance as a pure artifact of losing 80% of the data, not because
+   the effect changed. Ordering by `camis` (restaurant ID) selects only
+   long-tenured restaurants, since `camis` is assigned roughly
+   chronologically — testing that ordering returned restaurants skewed
+   toward a handful of old `camis` ranges, nothing like the current
+   restaurant population.
+
+The fix: `download_data.py` now pulls the **complete table** (paginated,
+~295k rows) bounded only by a `SNAPSHOT_CUTOFF` date, with a deterministic
+`$order` used purely to make pagination stable — not to pick a biased
+subset, since there's no subset being picked. Re-running it returns the
+same rows every time (verified across three separate pulls). This is also
+why every number in this README changed from an earlier version: the
+weaker, non-significant result above is what the complete population
+actually shows, not a different sample. See Running the analysis below for
+the commands.
 
 ## Modeling choice worth flagging
 
 **Pre-2023 re-inspections are collapsed into a single "2022 or earlier"
-category instead of one dummy per year.** The reason: after pairing visits
-and filtering to graded outcomes, only 29 eligible observations fall before
-2023 — too few to estimate stable year-by-year coefficients (a handful of
-single-observation year cells would otherwise dominate the fit or fail to
-converge). Bucketing trades year-level granularity for stability. This
-doesn't affect the borough estimates directly, since year is a control
+category instead of one dummy per year.** The reason: several individual
+years (2020: 6 eligible re-inspections, 2021: 2) are still too sparse to
+estimate stable year-by-year coefficients even in the complete dataset — a
+handful of single-observation year cells would otherwise dominate the fit
+or fail to converge. Bucketing trades year-level granularity for stability.
+This doesn't affect the borough estimates directly, since year is a control
 rather than the variable of interest, but it does mean the model can't say
-whether the borough gap has been widening, narrowing, or holding steady over
-time — a fully paired, multi-year dataset (rather than this single-pull
-sample) would be needed to answer that.
+whether the (already marginal) borough effect has been widening, narrowing,
+or holding steady over time.
 
 ## Data
 
 Source: [NYC DOHMH Restaurant Inspection Results](https://data.cityofnewyork.us/resource/43nn-pn8j.json)
-(295,054 rows; one row = one violation cited on one inspection, not one
-restaurant or one visit — see [`NOTES.md`](NOTES.md) for the data-quality
-pitfalls this matters for, including why `dba` can't be used to identify a
-restaurant and why borough capitalization silently zeroes out API queries).
+— the complete table as of the pinned snapshot date (~295k rows; one row is
+one violation cited on one inspection, not one restaurant or one visit —
+see [`NOTES.md`](NOTES.md) for the data-quality pitfalls this matters for,
+including why `dba` can't be used to identify a restaurant and why borough
+capitalization silently zeroes out API queries).
 
 ## Setup
 
@@ -82,9 +141,10 @@ pip install -r requirements.txt
 - [`data/by_camis.json`](data/by_camis.json) — derived summary of 969
   restaurants, keyed by `camis` (the stable restaurant ID).
 - [`data/restaurant-analysis/download_data.py`](data/restaurant-analysis/download_data.py) —
-  pulls up to 50,000 rows from the public API into
-  `restaurant_data.json` (gitignored — regenerate locally with
-  `python3 download_data.py` from that directory; ~50MB, too large to track).
+  pulls the complete table (paginated, ~295k rows, bounded by a pinned
+  `SNAPSHOT_CUTOFF` date for reproducibility — see Reproducing this above)
+  into `restaurant_data.json` (gitignored, ~270MB, too large to track;
+  regenerate locally with `python3 download_data.py` from that directory).
 - [`regression.py`](regression.py) — the shared statistics module: the
   initial→re-inspection pairing logic, the hand-rolled IRLS logistic fit, and
   the restaurant-clustered standard errors. Both scripts below import it
@@ -104,7 +164,7 @@ pip install -r requirements.txt
 ## Running the analysis
 
 ```bash
-python3 data/restaurant-analysis/download_data.py    # first: pulls the 50k-row extract these need
+python3 data/restaurant-analysis/download_data.py    # first: pulls the complete ~295k-row table (a few minutes)
 python3 analyze_reinspection_model.py                # the headline borough-adjusted model
 python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt
 python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt
@@ -143,7 +203,7 @@ run if you've generated `data/restaurant-analysis/restaurant_data.json` via
 **CI:** [`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the
 full suite on every push and pull request once this repo has a GitHub
 remote — compiles every script, then runs the test suite above. It doesn't
-fetch `restaurant_data.json` (50MB, regenerable, gitignored on purpose), so
+fetch `restaurant_data.json` (~270MB, regenerable, gitignored on purpose), so
 the data-gated tests skip there by design; everything else runs for real on
 every push.
 
@@ -172,7 +232,7 @@ can't create an account or project for you):
    Supabase's client libraries until you actually want them).
 6. `python3 supabase/load_data.py --sample` to load the 1,000-row sample
    first and confirm the connection works, then `python3 supabase/load_data.py`
-   for the full 50,000-row extract.
+   for the complete ~295k-row table.
 
 The loader deliberately uses the `service_role` key (needs write access); a
 future live site reading from this table would use the public `anon` key
@@ -181,14 +241,23 @@ reach a browser.
 
 ## Limitations
 
-- Single-pull sample, not the full 295k-row table — a fuller extract would
-  let the year-bucketing above be un-collapsed.
-- Cross-sectional, not causal: a borough's worse odds could reflect
-  inspector assignment, restaurant density, reporting lag, or unmeasured
-  neighborhood factors, not something intrinsic to the borough itself.
+- The headline result is genuinely weak, not strong: Queens sits right at
+  the edge of conventional significance
+  (p=.056 in the main model, p=.041–.099 depending on exact specification
+  in round 2) and Bronx doesn't clear it (p=.110–.128). Read this as "a
+  small, inconclusive signal," not as either "confirmed" or "disproven."
+- Cross-sectional, not causal: any real (or apparent) borough effect could
+  reflect inspector assignment, restaurant density, reporting lag, or
+  unmeasured neighborhood factors, not something intrinsic to the borough
+  itself.
 - Cuisine categories with fewer than 20 observations are folded into "Other"
   to avoid unstable single-cell estimates, which trades cuisine-level detail
   for model stability the same way the year-bucketing does.
+- `SNAPSHOT_CUTOFF` in `download_data.py` is a fixed date, not "today" —
+  reproducing this analysis exactly requires using that pinned date; pulling
+  fresh data from a later cutoff will (correctly) reflect a different,
+  larger set of inspections and won't reproduce these exact numbers either,
+  for legitimate reasons this time.
 
 ## License
 

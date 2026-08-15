@@ -1,110 +1,124 @@
-# Why the Bronx/Queens gap? A mechanism hunt
+# Why might a Bronx/Queens effect this size exist? A mechanism hunt
 
 *Technical appendix to [`README.md`](README.md), which is the canonical
-write-up of the finding this investigation is chasing an explanation for.*
+write-up. Read that first — in particular its "Reproducing this" section,*
+*which explains why the numbers here are much smaller than an earlier*
+*version of this file reported.* [`analyze_reinspection_model.py`](analyze_reinspection_model.py)
+*finds a small borough effect against the complete dataset that sits at or*
+*past the edge of conventional significance (Queens p=.056, Bronx p=.110),*
+*not the larger, clearly-significant effect an earlier 50,000-row sample*
+*showed. This document was originally written to explain that larger*
+*effect; it now tests the same candidate mechanisms against the complete*
+*dataset, in the same spirit, but the honest framing throughout is "does*
+*this move an already-marginal estimate," not "what explains a confirmed*
+*gap."*
 
-[`analyze_reinspection_model.py`](analyze_reinspection_model.py) establishes
-*that* Bronx and Queens restaurants have significantly worse odds of a B/C
-re-grade than Manhattan, adjusted for prior score, cuisine, and year. This
-script — [`investigate_borough_gap.py`](investigate_borough_gap.py) — tests
-three candidate mechanisms against the full local extract
-(`data/restaurant-analysis/restaurant_data.json`, 50,000 rows) to see if any
-of them explain *why*. Run it with `python3 investigate_borough_gap.py`.
+[`investigate_borough_gap.py`](investigate_borough_gap.py) tests three
+candidate mechanisms against the complete local extract
+(`data/restaurant-analysis/restaurant_data.json`, ~295k rows). Run it with
+`python3 investigate_borough_gap.py`.
 
 ## What was tested, and what didn't hold up
 
-**1. Is the initial citation itself worse in the Bronx/Queens?** No, not
-meaningfully. Violation counts, critical-violation counts, and inspection
-scores at the initial visit are nearly identical across boroughs (1.29
-violations/visit in Manhattan vs. 1.31–1.34 elsewhere). Bronx and Queens
-skew somewhat more toward structural/physical-condition violations — pests,
-temperature control, facility condition — (54.3% and 51.4% of visits vs.
-Manhattan's 49.6%), but the gap is modest, not the kind of difference that
-plausibly drives a 7-point re-grade gap by itself. (Corrected from an
-earlier pass that flagged temperature-control citations by keyword match
-against the violation description — real DOHMH text like "Cold TCS food
-item held above 41°F" never contains a literal "cold holding"/"hot
-holding" phrase, so that approach missed ~93% of actual temperature
-citations. Fixed by matching NYC's "02" violation-code family instead,
-which is exhaustive by construction. The correction raises every borough's
-share by roughly the same amount and leaves the ordering and conclusion
-unchanged — see `tests/test_borough_gap.py`.)
+**1. Is the initial citation itself worse in the Bronx/Queens?** Not by
+much. Initial-visit violation counts run slightly higher in the Bronx and
+Queens (3.39 and 3.56 violations/visit) than Manhattan (3.26), and the share
+of visits with at least one structural/physical-condition violation —
+pests, temperature control, facility condition — is a few points higher too
+(74.1% Bronx, 72.0% Queens, vs. Manhattan's 69.0%). Real, but modest
+differences, not the kind of gap that would plausibly drive even a 2-point
+re-grade difference by itself. (Temperature-control citations are matched
+by NYC's "02" violation-code family rather than by keyword, after an
+earlier keyword-based version of this check was found — via
+`tests/test_borough_gap.py` — to miss ~93% of real temperature citations;
+see that test file for the specifics.)
 
 **2. Do Bronx/Queens restaurants have less time to fix the problem before
 re-inspection?** Tested and **ruled out** — in the wrong direction, if
 anything. Bronx and Queens restaurants are re-inspected *sooner* (median
-124–127 days) than Manhattan (146 days), which would predict a worse, not
-better, outcome under a "less time to fix it" theory. But pooled across all
-boroughs, faster re-inspection correlates with a slightly *lower* B/C rate
-(40.0% for the fastest tercile vs. 44.0% for the slowest), and the
-correlation is negligible (r=0.037). Compliance-window length doesn't drive
-this.
+112 and 119 days) than Manhattan (135 days), which would predict a worse,
+not better, outcome under a "less time to fix it" theory. Compliance-window
+length doesn't point toward this explaining anything.
 
 **3. Are Bronx/Queens restaurants failing to fix the exact same violation
-(a "repeat offender" pattern)?** Partially true, but doesn't explain the
-overall gap. Bronx restaurants do show a real elevated recurrence rate — the
-identical violation code shows up again at re-inspection 16.8% of the time,
-vs. 13.8% in Manhattan. But within each borough, recurrence barely moves the
-B/C rate (in Queens: 46% B/C when a code recurs vs. 48% when it doesn't) —
-so the gap isn't concentrated among repeat offenders. It shows up broadly,
-including at restaurants whose re-inspection cited entirely new violations.
+(a "repeat offender" pattern)?** Partially true, and this one is a real,
+useful finding on its own even though it doesn't explain a borough gap.
+Recurring the identical violation code at re-inspection is common
+everywhere (63–76% of re-inspections across boroughs) and **strongly
+predicts a B/C outcome within every borough** — in Queens, 41% B/C when a
+code recurs vs. 14% when it doesn't; similar 3x gaps hold in every other
+borough. That's a substantive result about what predicts re-grade failure
+generally. But it doesn't explain a *borough* effect: recurrence rates are
+close enough across boroughs (Manhattan 71.7%, Bronx 75.0%, Queens 75.6%,
+Staten Island 62.8% as the outlier) that this isn't what's driving Bronx or
+Queens apart from Manhattan specifically. (An earlier pass against a
+50,000-row sample had found recurrence *rates* similar to this but the
+recurrence→B/C *correlation* far weaker — roughly 0.40 vs. 0.37, barely any
+difference. That earlier result looks like it undercounted recurring
+violations: the smaller sample sometimes didn't contain every violation row
+for a given inspection, so `codes_by_visit` was incomplete for some visits.
+The complete dataset doesn't have that problem.)
 
-## Round 1 conclusion
+## Round 1 takeaway
 
-None of the three mechanisms visible in the public inspection data — citation
-severity, compliance-window length, or repeat-violation patterns — account
-for the gap. It survives all three.
+Citation severity and compliance-window length don't point toward
+explaining even the small effect that survives in the complete dataset.
+Repeat-violation patterns are a real, strong predictor of B/C outcomes
+generally, but don't differ enough by borough to explain a borough-specific
+effect. None of the three make the Bronx/Queens estimate look more
+substantial than it already is (which, per README.md, is not very).
 
 ## Round 2: density, reporting lag, inspector assignment
 
 [`investigate_deeper_mechanisms.py`](investigate_deeper_mechanisms.py) tests
-the three explanations named as "most likely" in round 1. Run it with
+the three explanations round 1 couldn't reach. Run it with
 `python3 investigate_deeper_mechanisms.py`; full output is saved to
 [`outputs/deeper_mechanisms_results.txt`](outputs/deeper_mechanisms_results.txt).
 
 **4. Does restaurant density explain the gap?** The dataset has no true
 population-density or foot-traffic field, so this uses the closest available
 proxy: the number of distinct restaurants per NYC community board in the
-50,000-row extract (68 boards, 1–1,927 restaurants each). Adding
-`log(board density)` to the regression **visibly attenuates both borough
-effects**: Bronx OR 1.35 → 1.16 (p=.018 → .358), Queens OR 1.28 → 1.20
-(p=.007 → .076) — both lose significance at the conventional 0.05 threshold.
+complete extract (69 boards, 1–3,023 restaurants each). Adding
+`log(board density)` to the regression attenuates both borough estimates
+further: Bronx OR 1.119 → 1.098 (p=.128 → .328), Queens OR 1.116 → 1.105
+(p=.041 → .099) — Queens crosses from just past the significance boundary
+to clearly not significant.
 
-That is a real result, but not a clean one. Community-board density is
-itself strongly correlated with borough — the median board in Manhattan has
-908 restaurants versus 310 elsewhere — so this attenuation is genuinely
-ambiguous between two readings: density could be a real confound, or adding
-a covariate this collinear with borough could simply widen the standard
-errors (both CIs do widen) without density doing real explanatory work.
-**Verdict: suggestive, not conclusive.** Density is the first candidate in
-either round that visibly moves the estimate, and it's the strongest lead
-for follow-up — but it can't be reported as "explains the gap" on this
-evidence alone. A cleaner test would need restaurant density measured
-independently of borough (e.g., commercial square footage or foot traffic
-per census tract) rather than a restaurant count that borough itself drives.
+Community-board density is itself strongly correlated with borough — median
+1,323 restaurants per board in Manhattan vs. 439 elsewhere — so, as before,
+this is genuinely ambiguous between two readings: density could be a real
+confound, or adding a covariate this collinear with borough could simply
+widen the standard errors without density doing real explanatory work. The
+density term's own effect is close to null on its own (OR 0.988, p=.744),
+which leans toward the second reading. **Verdict: doesn't move an
+already-weak estimate toward looking more real.**
 
 **5. Does reporting lag (inspection → public posting) explain the gap?**
-**Untestable with this dataset**, not ruled out. `record_date` looks like a
+**Still untestable with this dataset.** `record_date` looks like a
 per-inspection publish date but is actually a data-pull timestamp — it takes
-only 3 distinct values across 50,000 rows, all clustered on the day the
-extract was downloaded. `grade_date` looked like the alternative, but it
-equals `inspection_date` for 100% of the 22,405 graded rows (0-day
+only 3 distinct values across the entire ~295k-row extract, all clustered on
+the day this snapshot was taken. `grade_date` looked like the alternative,
+but it equals `inspection_date` for 100% of the 134,550 graded rows (0-day
 "lag" always). Neither field measures what DOHMH actually took to post a
-result. This is a genuinely different outcome from "tested, no effect" —
-it means the question is still open, just not answerable from this feed.
+result. Same conclusion as before: this is a genuinely open question, not
+answerable from this feed, not a "tested, no effect."
 
 **6. Does inspector assignment or staffing explain the gap?** Still
-untestable. All 31 fields in the extract were enumerated by hand; none
-identify an inspector, a team, or a staffing level. Same conclusion as round
-1, confirmed directly against the field list rather than assumed.
+untestable. All 27 fields in the complete extract were enumerated by hand
+(four internal geo-join columns present in an earlier smaller pull don't
+appear in this one; irrelevant either way, since none of the 31 or 27 was
+ever an inspector/staffing field). Same conclusion as round 1.
 
 ## What's left after both rounds
 
-Five of six candidate mechanisms are now addressed: three ruled out (round
-1), one suggestive-but-ambiguous (density), two confirmed untestable with
-public data (reporting lag, inspector assignment). The honest state of the
-question: **restaurant density is the strongest lead this analysis has
-produced, but it stops at "worth a cleaner test with independent density
-data," not "explains the gap."** Inspector assignment and staffing levels —
-plausible, common explanations for geographic disparities in public-agency
-outcomes — remain outside what DOHMH publishes.
+Every mechanism visible in the public inspection data was tested against the
+complete dataset. None of them make the Bronx/Queens estimate look more
+substantial — if anything, adding density pushes Queens from "just past the
+edge of significance" to "clearly not." The honest state of the question,
+given README.md's finding that the underlying effect is already small and
+largely non-significant: **there isn't a real gap here demanding an
+explanation so much as there's a small, mostly-not-significant signal that
+none of the available public data makes look any more real.** Inspector
+assignment and staffing levels remain the one class of explanation this
+public dataset genuinely cannot rule in or out, for a signal that may not
+need explaining in the first place.
