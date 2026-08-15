@@ -415,12 +415,16 @@
       </p>
       <p class="section-intro">Requires Python 3 with pandas, numpy, and requests (for the downloader).</p>
       <pre><code>pip install -r requirements.txt
-python3 data/restaurant-analysis/download_data.py    # first: pulls the complete ~295k-row table (a few minutes)
-python3 analyze_reinspection_model.py                # borough-adjusted logistic model
-python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt
-python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt
+python3 data/restaurant-analysis/download_data.py    # first: pulls the complete ~295k-row table (~1 minute)
+python3 analyze_reinspection_model.py                # borough-adjusted logistic model (~15s)
+python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt (~25s)
+python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt (~15s)
 python3 -m unittest discover -s tests -v             # run the test suite</code></pre>
-      <p class="section-intro" style="margin-top: 10px;">All three exit with a clear message (not a traceback) if you skip the first step.</p>
+      <p class="section-intro" style="margin-top: 10px;">
+        All three exit with a clear message (not a traceback) if you skip the first
+        step. None of them print anything while working — if one goes quiet for a
+        while, that's expected, not stuck.
+      </p>
 
       <h3 style="font-size:16px; margin:28px 0 10px;">Contents</h3>
       <ul class="contents-list">

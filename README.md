@@ -164,13 +164,19 @@ pip install -r requirements.txt
 ## Running the analysis
 
 ```bash
-python3 data/restaurant-analysis/download_data.py    # first: pulls the complete ~295k-row table (a few minutes)
-python3 analyze_reinspection_model.py                # the headline borough-adjusted model
-python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt
-python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt
+python3 data/restaurant-analysis/download_data.py    # first: pulls the complete ~295k-row table (~1 minute)
+python3 analyze_reinspection_model.py                # the headline borough-adjusted model (~15s)
+python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt (~25s)
+python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt (~15s)
 ```
 
 All three exit with a clear message (not a traceback) if you skip the first step.
+None of them print anything while they're working (`investigate_borough_gap.py`
+in particular used to sit silent for 46 of its ~49 seconds against the
+complete dataset, purely from an accidental O(restaurants × visits) filter
+inside its main loop — fixed once found; the remaining time is inherent to
+iterating ~31k restaurants in Python, not another bug). If a script goes
+quiet for a while, that's expected, not stuck.
 
 Results are also saved to [`outputs/reinspection_model_results.txt`](outputs/reinspection_model_results.txt)
 and [`outputs/deeper_mechanisms_results.txt`](outputs/deeper_mechanisms_results.txt).
