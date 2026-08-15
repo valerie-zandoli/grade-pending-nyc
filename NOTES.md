@@ -6,7 +6,7 @@ hunt.*
 
 Source: NYC DOHMH Restaurant Inspection Results
 `https://data.cityofnewyork.us/resource/43nn-pn8j.json`
-Full table: 295,054 rows. `data/sample_1000.json` (`?$limit=1000`) is a small
+Full table: 295,048 rows. `data/sample_1000.json` (`?$limit=1000`) is a small
 descriptive sample, used only for the illustrative charts under "The data" —
 not the extract the regression runs against.
 
