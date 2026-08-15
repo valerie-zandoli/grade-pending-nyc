@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grade Pending NYC — Restaurant Re-inspection Analysis</title>
-<meta name="description" content="Bronx and Queens restaurants are significantly less likely to re-grade to an A after a NYC health-code violation than Manhattan restaurants, even after adjusting for citation severity, cuisine, and timing.">
+<meta name="description" content="A borough gap that looked significant in a 50,000-row sample shrank and missed conventional significance against the complete 295,048-row NYC DOHMH re-inspection dataset — a finding about replication as much as about restaurant grades.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,29 +22,29 @@
 <header class="hero">
   <div class="wrap">
     <p class="eyebrow">Pursuit AI Native Program · Week 6 of enrollment</p>
-    <h1>Restaurants in the Bronx and Queens are less likely to recover an A grade</h1>
+    <h1>A borough gap that mostly didn't survive checking against the complete data</h1>
     <p class="lede">
-      On 3,921 paired NYC DOHMH initial → re-inspection visits since 2016, Bronx and
-      Queens restaurants have significantly worse odds of landing a B or C grade at
-      re-inspection than Manhattan restaurants — holding prior inspection score,
-      cuisine, and re-inspection year fixed. Brooklyn and Staten Island aren't
-      statistically distinguishable from Manhattan.
+      A 50,000-row sample suggested Bronx and Queens restaurants had significantly
+      worse odds of a B or C grade at re-inspection than Manhattan. Against the
+      complete 295,048-row NYC DOHMH population, that gap shrinks by more than half
+      and misses conventional significance — Queens sits right at the edge, Bronx
+      doesn't clear it. <a href="#reproduce">Here's how that was caught.</a>
     </p>
     <div class="stat-row">
       <div class="stat-tile reference">
         <p class="stat-label"><span class="dot reference"></span>Manhattan</p>
-        <p class="stat-value">56.7%</p>
+        <p class="stat-value">68.5%</p>
         <p class="stat-delta">reference borough</p>
       </div>
-      <div class="stat-tile bad">
-        <p class="stat-label"><span class="dot bad"></span>Bronx</p>
-        <p class="stat-value">49.5%</p>
-        <p class="stat-delta">−7.2 pts · OR 1.36, p=.014</p>
+      <div class="stat-tile suggestive">
+        <p class="stat-label"><span class="dot suggestive"></span>Bronx</p>
+        <p class="stat-value">66.0%</p>
+        <p class="stat-delta">−2.4 pts · OR 1.12, p=.110 (not significant)</p>
       </div>
-      <div class="stat-tile bad">
-        <p class="stat-label"><span class="dot bad"></span>Queens</p>
-        <p class="stat-value">51.1%</p>
-        <p class="stat-delta">−5.6 pts · OR 1.27, p=.009</p>
+      <div class="stat-tile suggestive">
+        <p class="stat-label"><span class="dot suggestive"></span>Queens</p>
+        <p class="stat-value">66.4%</p>
+        <p class="stat-delta">−2.1 pts · OR 1.11, p=.056 (borderline)</p>
       </div>
     </div>
   </div>
@@ -55,16 +55,20 @@
   <section id="finding">
     <div class="wrap">
       <p class="section-kicker">The finding</p>
-      <h2>A borough-specific gap, not an outer-borough effect</h2>
+      <h2>A small, mostly-not-significant borough effect</h2>
       <p class="section-intro">
-        A restaurant-clustered logistic regression on 3,921 linked initial →
-        re-inspection visits (3,462 unique restaurants) finds that Bronx (OR 1.36,
-        95% CI 1.07–1.74, p=.014) and Queens (OR 1.27, 95% CI 1.06–1.52, p=.009)
-        restaurants have significantly worse odds of a B/C grade at re-inspection
-        than Manhattan, adjusted for prior score, cuisine, and year. Brooklyn (OR
-        1.16, p=.119) and Staten Island (OR 0.78, p=.207) are not statistically
-        distinguishable from Manhattan — so this isn't "outer boroughs vs.
-        Manhattan," it's specific to the Bronx and Queens.
+        A restaurant-clustered logistic regression on 14,414 linked initial →
+        re-inspection visits (11,095 unique restaurants) from the complete NYC
+        DOHMH extract finds that Bronx (OR 1.12, 95% CI 0.97–1.30, p=.110) and
+        Queens (OR 1.11, 95% CI 1.00–1.23, p=.056) restaurants show a small
+        tendency toward worse odds of a B/C grade at re-inspection than
+        Manhattan, adjusted for prior score, cuisine, and year — but neither
+        clears conventional significance. Brooklyn (OR 0.98, p=.686) and Staten
+        Island (OR 0.86, p=.164) remain indistinguishable from Manhattan.
+        <strong>An earlier 50,000-row sample of this data had shown a much
+        larger, clearly significant gap</strong> (Bronx p=.014, Queens p=.009) —
+        that result didn't replicate against the complete population. See
+        <a href="#reproduce">Reproduce this</a> for why.
       </p>
 
       <div class="chart-grid">
@@ -87,9 +91,9 @@
               (() => {
                 const root = document.getElementById('borough-reinspection-odds');
                 const rows = [
-                  {name:'Bronx', or:.735, low:.575, high:.939, significant:true},
+                  {name:'Bronx', or:.890, low:.771, high:1.027, significant:false},
                   {name:'Manhattan', or:1, low:1, high:1, reference:true},
-                  {name:'Queens', or:.787, low:.657, high:.943, significant:true}
+                  {name:'Queens', or:.903, low:.814, high:1.002, significant:false}
                 ];
                 const svg = root.querySelector('#plot');
                 function render() {
@@ -135,18 +139,18 @@
               (() => {
                 const root = document.getElementById('adjusted-a-grade-probability');
                 const rows = [
-                  {name:'Manhattan', value:.5668, low:.5385, high:.5950, reference:true},
-                  {name:'Bronx', value:.4950, low:.4460, high:.5440},
-                  {name:'Queens', value:.5110, low:.4809, high:.5411}
+                  {name:'Manhattan', value:.6847, low:.6709, high:.6985, reference:true},
+                  {name:'Bronx', value:.6604, low:.6342, high:.6866},
+                  {name:'Queens', value:.6636, low:.6475, high:.6797}
                 ];
                 const svg = root.querySelector('#plot');
                 function render() {
-                  const W=Math.max(330,svg.clientWidth||700), H=225, left=120, right=76, top=25, bottom=46, min=.40, max=.65;
+                  const W=Math.max(330,svg.clientWidth||700), H=225, left=120, right=76, top=25, bottom=46, min=.60, max=.75;
                   const x=v=>left+(v-min)/(max-min)*(W-left-right), y=i=>top+i*(H-top-bottom)/(rows.length-1);
-                  const ticks=[.40,.45,.50,.55,.60,.65];
+                  const ticks=[.60,.65,.70,.75];
                   let out=`<rect class="axis" data-chart-frame x="${left}" y="${top-14}" width="${W-left-right}" height="${H-top-bottom+28}" fill="none"></rect>`;
                   ticks.forEach(t=>{out+=`<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top-14}" y2="${H-bottom+14}"></line><text class="tick" x="${x(t)}" y="${H-22}" text-anchor="middle">${Math.round(t*100)}%</text>`;});
-                  rows.forEach((d,i)=>{const yy=y(i), color=d.reference?'var(--foreground)':'var(--viz-series-1)';out+=`<text class="label" x="${left-10}" y="${yy+4}" text-anchor="end">${d.name}</text><line x1="${x(d.low)}" x2="${x(d.high)}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3"></line><line x1="${x(d.low)}" x2="${x(d.low)}" y1="${yy-7}" y2="${yy+7}" stroke="${color}" stroke-width="2"></line><line x1="${x(d.high)}" x2="${x(d.high)}" y1="${yy-7}" y2="${yy+7}" stroke="${color}" stroke-width="2"></line><circle cx="${x(d.value)}" cy="${yy}" r="7" fill="${color}"></circle><text class="value" x="${W-right+9}" y="${yy+4}">${(d.value*100).toFixed(1)}%</text>`;});
+                  rows.forEach((d,i)=>{const yy=y(i), color=d.reference?'var(--foreground)':'var(--viz-series-4)';out+=`<text class="label" x="${left-10}" y="${yy+4}" text-anchor="end">${d.name}</text><line x1="${x(d.low)}" x2="${x(d.high)}" y1="${yy}" y2="${yy}" stroke="${color}" stroke-width="3"></line><line x1="${x(d.low)}" x2="${x(d.low)}" y1="${yy-7}" y2="${yy+7}" stroke="${color}" stroke-width="2"></line><line x1="${x(d.high)}" x2="${x(d.high)}" y1="${yy-7}" y2="${yy+7}" stroke="${color}" stroke-width="2"></line><circle cx="${x(d.value)}" cy="${yy}" r="7" fill="${color}"></circle><text class="value" x="${W-right+9}" y="${yy+4}">${(d.value*100).toFixed(1)}%</text>`;});
                   out+=`<text class="axis-title" data-axis="x" x="${(left+W-right)/2}" y="${H-3}" text-anchor="middle">model-adjusted probability of A grade · 95% confidence interval</text>`;
                   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('height',H);svg.innerHTML=out;
                 }
@@ -162,60 +166,64 @@
           <tr><th>Borough</th><th class="num">Adjusted odds ratio</th><th class="num">95% CI</th><th class="num">p-value</th></tr>
         </thead>
         <tbody>
-          <tr><td>Bronx</td><td class="num">1.361</td><td class="num">1.065–1.740</td><td class="num">0.014</td></tr>
-          <tr><td>Brooklyn</td><td class="num">1.160</td><td class="num">0.963–1.399</td><td class="num">0.119</td></tr>
-          <tr><td>Queens</td><td class="num">1.271</td><td class="num">1.060–1.523</td><td class="num">0.009</td></tr>
-          <tr><td>Staten Island</td><td class="num">0.784</td><td class="num">0.538–1.144</td><td class="num">0.207</td></tr>
+          <tr><td>Bronx</td><td class="num">1.124</td><td class="num">0.974–1.297</td><td class="num">0.110</td></tr>
+          <tr><td>Brooklyn</td><td class="num">0.979</td><td class="num">0.881–1.087</td><td class="num">0.686</td></tr>
+          <tr><td>Queens</td><td class="num">1.107</td><td class="num">0.998–1.228</td><td class="num">0.056</td></tr>
+          <tr><td>Staten Island</td><td class="num">0.864</td><td class="num">0.702–1.062</td><td class="num">0.164</td></tr>
         </tbody>
       </table>
       <p class="section-intro" style="margin-bottom:0;">
-        Prior inspection score matters too: every 10-point increase in the initial
-        score corresponds to <strong>1.22×</strong> higher odds of a B/C grade at
-        re-inspection (95% CI 1.16–1.28, p&lt;.001) — worse initial citations predict
-        worse re-inspection outcomes, as expected, and the borough effect holds
-        after controlling for it.
+        Prior inspection score is the one effect in this model that's robustly
+        significant: every 10-point increase in the initial score corresponds to
+        <strong>1.20×</strong> higher odds of a B/C grade at re-inspection (95% CI
+        1.17–1.23, p&lt;.001) — worse initial citations predict worse re-inspection
+        outcomes, as expected. The borough effect is much weaker by comparison.
       </p>
     </div>
   </section>
 
   <section id="why">
     <div class="wrap">
-      <p class="section-kicker">Why does the gap exist?</p>
-      <h2>Six mechanisms tested across two rounds</h2>
+      <p class="section-kicker">Why might an effect this size exist?</p>
+      <h2>Six mechanisms tested against the complete dataset</h2>
       <p class="section-intro">
-        Round 1 (<a href="investigate_borough_gap.py">investigate_borough_gap.py</a>)
-        tests three candidate explanations against the full 50,000-row local
-        extract. None of them account for the gap.
+        Given how small and mostly-non-significant the borough effect above
+        already is, none of this should be read as "explaining a confirmed
+        gap" — it's closer to "does anything make an already-marginal signal
+        look more real." Round 1 (<a href="investigate_borough_gap.py">investigate_borough_gap.py</a>)
+        tests three candidate explanations against the complete local extract.
       </p>
 
       <div class="mechanism-list">
         <div class="mechanism-card">
-          <p class="verdict">✕ Ruled out</p>
+          <p class="verdict">✕ Doesn't help explain it</p>
           <h3>Is the initial citation itself worse in the Bronx/Queens?</h3>
           <p>
-            No, not meaningfully. Violation counts, critical-violation counts, and
-            inspection scores at the initial visit are nearly identical across
-            boroughs (1.29 violations/visit in Manhattan vs. 1.31–1.34 elsewhere).
+            Only slightly. Initial-visit violation counts run a bit higher in the
+            Bronx and Queens (3.39, 3.56) than Manhattan (3.26) — real, but too
+            small a gap to plausibly drive even a 2-point re-grade difference.
           </p>
         </div>
         <div class="mechanism-card">
-          <p class="verdict">✕ Ruled out</p>
+          <p class="verdict">✕ Doesn't help explain it</p>
           <h3>Do Bronx/Queens restaurants have less time to fix the problem?</h3>
           <p>
             Ruled out — in the wrong direction, if anything. Bronx and Queens
-            restaurants are re-inspected <em>sooner</em> (median 124–127 days) than
-            Manhattan (146 days), and faster re-inspection correlates with a
-            slightly <em>lower</em> B/C rate, not a higher one (r=0.037).
+            restaurants are re-inspected <em>sooner</em> (median 112–119 days) than
+            Manhattan (135 days), which would predict a worse, not better, outcome
+            under a "less time to fix it" theory.
           </p>
         </div>
         <div class="mechanism-card">
-          <p class="verdict">✕ Ruled out</p>
+          <p class="verdict">◐ Real finding, wrong shape</p>
           <h3>Are they failing to fix the exact same violation?</h3>
           <p>
-            Partially true (Bronx recurrence: 16.8% vs. Manhattan's 13.8%), but
-            doesn't explain the overall gap — within each borough, recurrence
-            barely moves the B/C rate. The gap shows up broadly, including at
-            restaurants with entirely new violations at re-inspection.
+            A recurring violation code <strong>strongly predicts</strong> a B/C
+            outcome within every borough (roughly 3× higher B/C rate when a code
+            recurs) — a genuinely useful finding about grading generally. But
+            recurrence <em>rates</em> are close enough across boroughs (70–76%,
+            Staten Island the outlier at 63%) that this doesn't explain a
+            borough-specific gap on its own.
           </p>
         </div>
       </div>
@@ -226,14 +234,16 @@
       </p>
       <div class="mechanism-list" style="margin-top: 14px;">
         <div class="mechanism-card" style="border-left: 3px solid var(--viz-series-4);">
-          <p class="verdict" style="color: var(--viz-series-4);">◐ Suggestive, not conclusive</p>
+          <p class="verdict" style="color: var(--viz-series-4);">◐ Pushes the estimate further down</p>
           <h3>Does restaurant density explain the gap?</h3>
           <p>
-            Adding a density proxy (restaurants per community board) shrinks both
-            borough effects below significance (Bronx p=.018→.358, Queens
-            p=.007→.076) — the strongest lead so far. But density is itself
-            correlated with being in Manhattan, so this could be a real
-            confound or just collinearity inflating the uncertainty.
+            Adding a density proxy (restaurants per community board) attenuates
+            both borough estimates further: Bronx p=.128→.328, Queens
+            p=.041→.099 — Queens moves from just past the significance boundary
+            to clearly not significant. Density is itself correlated with
+            being in Manhattan, so this is ambiguous between "real confound"
+            and "collinearity inflating the uncertainty" — but it doesn't make
+            the effect look more real either way.
           </p>
         </div>
         <div class="mechanism-card" style="border-left: 3px solid var(--text-muted);">
@@ -242,7 +252,7 @@
           <p>
             Not ruled out — genuinely unmeasurable here. The field that looked
             like a publish date (<code>record_date</code>) is actually a
-            data-download timestamp (3 distinct values across 50,000 rows);
+            data-download timestamp (3 distinct values across ~295k rows);
             <code>grade_date</code> equals <code>inspection_date</code> on
             every graded row.
           </p>
@@ -251,19 +261,21 @@
           <p class="verdict" style="color: var(--text-muted);">? Untestable with this data</p>
           <h3>Does inspector assignment explain the gap?</h3>
           <p>
-            Still untestable — all 31 fields in the extract were enumerated by
-            hand; none identify an inspector, team, or staffing level. DOHMH
-            doesn't publish this.
+            Still untestable — all 27 fields in the complete extract were
+            enumerated by hand; none identify an inspector, team, or staffing
+            level. DOHMH doesn't publish this.
           </p>
         </div>
       </div>
 
       <p class="conclusion-callout" style="margin-top: 22px;">
-        Five of six candidate mechanisms are now addressed: three ruled out,
-        one suggestive-but-ambiguous (density), two confirmed untestable with
-        public data. Restaurant density is the strongest lead this analysis
-        has produced, but it stops at "worth a cleaner test," not "explains
-        the gap." Full write-up in <a href="INVESTIGATION.md">INVESTIGATION.md</a>.
+        Every mechanism visible in the public data was tested against the
+        complete dataset. None of them make the Bronx/Queens estimate look
+        more substantial — density pushes Queens from borderline to clearly
+        not significant. The honest read: there isn't a confirmed gap here
+        demanding an explanation, so much as a small, mostly-not-significant
+        signal that nothing available makes look any more real. Full write-up
+        in <a href="INVESTIGATION.md">INVESTIGATION.md</a>.
       </p>
     </div>
   </section>
@@ -274,10 +286,12 @@
       <h2>NYC DOHMH Restaurant Inspection Results</h2>
       <p class="section-intro">
         Source: <a href="https://data.cityofnewyork.us/resource/43nn-pn8j.json" target="_blank" rel="noopener">NYC DOHMH Restaurant Inspection Results</a>
-        (295,054 rows). One row = one violation cited on one inspection — not one
-        restaurant, not even one visit. A restaurant cited for six things on one
-        visit produces six rows with the same <code>camis</code>, so any real
-        analysis has to group by restaurant and inspection date first, or it
+        — the complete table as of a pinned snapshot date (~295,048 rows; see
+        <a href="#reproduce">Reproduce this</a> for why it's the whole table
+        rather than a sample). One row = one violation cited on one inspection —
+        not one restaurant, not even one visit. A restaurant cited for six things
+        on one visit produces six rows with the same <code>camis</code>, so any
+        real analysis has to group by restaurant and inspection date first, or it
         double-counts. See <a href="NOTES.md">NOTES.md</a> for the full list of
         data-quality gotchas (borough capitalization silently zeroing out API
         queries, <code>dba</code> name variants, missing-not-null violation fields).
@@ -346,10 +360,11 @@
       <ul class="limits-list">
         <li>
           Pre-2023 re-inspections are collapsed into a single "2022 or earlier"
-          category instead of one dummy per year — only 29 eligible observations
-          fall before 2023, too few to estimate stable year-by-year coefficients.
-          Year is a control here, not the variable of interest, so this doesn't
-          affect the borough estimates directly.
+          category instead of one dummy per year — several individual years
+          (2020: 6 eligible re-inspections, 2021: 2) are still too sparse to
+          estimate stable year-by-year coefficients, even in the complete
+          dataset. Year is a control here, not the variable of interest, so
+          this doesn't affect the borough estimates directly.
         </li>
         <li>
           Cuisine categories with fewer than 20 observations are folded into
@@ -359,8 +374,8 @@
 
       <h3 style="font-size:16px; margin:24px 0 10px;">Limitations</h3>
       <ul class="limits-list">
-        <li>Single-pull sample, not the full 295k-row table — a fuller extract would let the year-bucketing above be un-collapsed.</li>
-        <li>Cross-sectional, not causal: a borough's worse odds could reflect inspector assignment, restaurant density, reporting lag, or unmeasured neighborhood factors, not something intrinsic to the borough itself.</li>
+        <li>The headline result is genuinely weak, not strong: Queens sits right at the edge of conventional significance and Bronx doesn't clear it. Read this as "a small, inconclusive signal," not "confirmed" or "disproven."</li>
+        <li>Cross-sectional, not causal: any real (or apparent) borough effect could reflect inspector assignment, restaurant density, reporting lag, or unmeasured neighborhood factors, not something intrinsic to the borough itself.</li>
         <li>Cuisine folding trades cuisine-level detail for model stability, the same way the year-bucketing does.</li>
       </ul>
     </div>
@@ -369,10 +384,38 @@
   <section id="reproduce">
     <div class="wrap">
       <p class="section-kicker">Reproduce this</p>
-      <h2>Run the analysis locally</h2>
+      <h2>Why the numbers on this page changed</h2>
+      <p class="section-intro">
+        <strong>An earlier version of <code>download_data.py</code> pulled 50,000
+        rows with no date filter and no explicit sort order.</strong> That had two
+        problems. First, it wasn't reproducible: Socrata doesn't guarantee stable
+        row ordering for offset-based pagination without an explicit sort, and the
+        feed is live, so re-running that script later silently returned a
+        different slice than whoever ran it before you got — the specific
+        57%-vs-50%, clearly-significant result quoted in earlier versions of this
+        page can't be regenerated from the documented steps. Second, the obvious
+        fix made things worse: pinning a deterministic sort order requires
+        <em>some</em> sort key, and every one available here introduces real bias
+        for this paired initial→re-inspection design. Ordering by date
+        right-censors the sample — recent initial inspections haven't had time to
+        get re-inspected yet, which collapsed the paired sample from 3,921 to 779
+        re-inspections in testing and pushed every p-value into insignificance as
+        a pure artifact of losing 80% of the data. Ordering by restaurant ID
+        selected only long-tenured restaurants, since IDs are assigned roughly
+        chronologically.
+      </p>
+      <p class="section-intro">
+        The fix: <code>download_data.py</code> now pulls the <strong>complete
+        table</strong> (paginated, ~295k rows) bounded only by a pinned
+        <code>SNAPSHOT_CUTOFF</code> date, with a sort order used purely to make
+        pagination stable, not to select a biased subset. Re-running it returns
+        the same rows every time — verified across three separate pulls. Every
+        number on this page changed from an earlier version because this is what
+        the complete population actually shows, not a different sample.
+      </p>
       <p class="section-intro">Requires Python 3 with pandas, numpy, and requests (for the downloader).</p>
       <pre><code>pip install -r requirements.txt
-python3 data/restaurant-analysis/download_data.py    # first: pulls the 50k-row extract these need
+python3 data/restaurant-analysis/download_data.py    # first: pulls the complete ~295k-row table (a few minutes)
 python3 analyze_reinspection_model.py                # borough-adjusted logistic model
 python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt
 python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt
@@ -388,11 +431,13 @@ python3 -m unittest discover -s tests -v             # run the test suite</code>
         <li><a href="analyze_reinspection_model.py">analyze_reinspection_model.py</a> — the restaurant-clustered logistic regression.</li>
         <li><a href="investigate_borough_gap.py">investigate_borough_gap.py</a> — round 1: tests three candidate mechanisms.</li>
         <li><a href="investigate_deeper_mechanisms.py">investigate_deeper_mechanisms.py</a> — round 2: density, reporting lag, inspector assignment.</li>
-        <li><a href="tests/test_regression.py">tests/test_regression.py</a> / <a href="tests/test_borough_gap.py">tests/test_borough_gap.py</a> — automated tests for the shared statistics module and round 1's own logic.</li>
+        <li><a href="tests/test_regression.py">tests/test_regression.py</a> / <a href="tests/test_borough_gap.py">tests/test_borough_gap.py</a> / <a href="tests/test_supabase_load_data.py">tests/test_supabase_load_data.py</a> — automated tests.</li>
         <li><a href=".github/workflows/tests.yml">.github/workflows/tests.yml</a> — runs the test suite on every push/PR.</li>
         <li><a href="data/sample_1000.json">data/sample_1000.json</a> — 1,000-row raw sample.</li>
         <li><a href="data/by_camis.json">data/by_camis.json</a> — derived summary keyed by restaurant ID.</li>
         <li><a href="outputs/reinspection_model_results.txt">outputs/reinspection_model_results.txt</a> / <a href="outputs/borough_gap_results.txt">borough_gap_results.txt</a> / <a href="outputs/deeper_mechanisms_results.txt">deeper_mechanisms_results.txt</a> — saved outputs.</li>
+        <li><a href="supabase/">supabase/</a> — schema and loader for a possible future live version (groundwork, not yet used).</li>
+        <li><a href="LICENSE">LICENSE</a> — MIT.</li>
       </ul>
     </div>
   </section>
