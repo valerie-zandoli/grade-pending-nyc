@@ -85,8 +85,8 @@
               #borough-reinspection-odds .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
               #borough-reinspection-odds .muted { fill: color-mix(in srgb, var(--foreground) 65%, transparent); font-size: 11px; }
             </style>
-            <h3>Odds of Restaurants in the Bronx and Queens Achieving an A Grade after a Violation Compared to Manhattan</h3>
-            <svg id="plot" aria-label="Forest plot of adjusted odds of A grade by borough"></svg>
+            <h3>Odds of restaurants in the Bronx and Queens achieving an A grade after a violation, compared to Manhattan</h3>
+            <svg id="borough-odds-plot" aria-label="Forest plot of adjusted odds of A grade by borough"></svg>
             <script>
               (() => {
                 const root = document.getElementById('borough-reinspection-odds');
@@ -95,7 +95,7 @@
                   {name:'Manhattan', or:1, low:1, high:1, reference:true},
                   {name:'Queens', or:.903, low:.814, high:1.002, significant:false}
                 ];
-                const svg = root.querySelector('#plot');
+                const svg = root.querySelector('#borough-odds-plot');
                 function render() {
                   const W = Math.max(330, svg.clientWidth || 700), H = 285, left = 132, right = 92, top = 28, bottom = 46;
                   const x0 = left, x1 = W - right, y0 = top, y1 = H - bottom, min=.4, max=2;
@@ -133,8 +133,8 @@
               #adjusted-a-grade-probability .label, #adjusted-a-grade-probability .tick { fill: var(--foreground); font-size: 12px; }
               #adjusted-a-grade-probability .value { fill: var(--foreground); font-size: 12px; font-weight: 600; }
             </style>
-            <h3>Adjusted Chance of an A Grade After Re-inspection</h3>
-            <svg id="plot" aria-label="Dot and whisker plot showing adjusted A grade probability and 95 percent confidence intervals"></svg>
+            <h3>Adjusted chance of an A grade after re-inspection</h3>
+            <svg id="a-grade-probability-plot" aria-label="Dot and whisker plot showing adjusted A grade probability and 95 percent confidence intervals"></svg>
             <script>
               (() => {
                 const root = document.getElementById('adjusted-a-grade-probability');
@@ -143,7 +143,7 @@
                   {name:'Bronx', value:.6604, low:.6342, high:.6866},
                   {name:'Queens', value:.6636, low:.6475, high:.6797}
                 ];
-                const svg = root.querySelector('#plot');
+                const svg = root.querySelector('#a-grade-probability-plot');
                 function render() {
                   const W=Math.max(330,svg.clientWidth||700), H=225, left=120, right=76, top=25, bottom=46, min=.60, max=.75;
                   const x=v=>left+(v-min)/(max-min)*(W-left-right), y=i=>top+i*(H-top-bottom)/(rows.length-1);
@@ -320,7 +320,7 @@
             <section class="chart"><h4>Records by borough</h4><p class="note">Manhattan accounts for the largest share of the sample.</p><svg id="borough"></svg></section>
             <section class="chart"><h4>Most common cuisines</h4><p class="note">Top 8 self-reported cuisine descriptions.</p><svg id="cuisine"></svg></section>
             <section class="chart"><h4>Critical-flag mix</h4><p class="note">Critical citations make up just over half of all rows.</p><svg id="critical"></svg></section>
-            <section class="chart"><h4>Inspection record dates</h4><p class="note">1900 entries are missing/sentinel dates and are shown separately.</p><svg id="years"></svg></section>
+            <section class="chart"><h4>Inspection record dates</h4><p class="note">Chart shows 2022–2026 (970 of 1,000 rows); the rest use 1900 as a placeholder date (16 rows) or predate 2022 (14 rows).</p><svg id="years"></svg></section>
             <section class="chart"><h4>Inspection action recorded</h4><p class="note">Most sample rows come from inspections where violations were cited.</p><svg id="action"></svg></section>
           </div>
           <script>
@@ -347,7 +347,7 @@
               const svg=root.querySelector('#critical'), W=Math.max(300,svg.clientWidth||460), H=210, cx=112,cy=99,r=68,total=1000; let angle=-Math.PI/2, out='';
               data.critical.forEach((d,i)=>{ const a=d.value/total*Math.PI*2, x1=cx+r*Math.cos(angle), y1=cy+r*Math.sin(angle), x2=cx+r*Math.cos(angle+a), y2=cy+r*Math.sin(angle+a), large=a>Math.PI?1:0; out+=`<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z" fill="${colors[i]}"></path>`; angle+=a; });
               out += `<circle cx="${cx}" cy="${cy}" r="38" fill="var(--background)"></circle><text class="value" x="${cx}" y="${cy-3}" text-anchor="middle">1,000</text><text class="muted" x="${cx}" y="${cy+14}" text-anchor="middle">rows</text>`;
-              data.critical.forEach((d,i)=>{let y=54+i*36;out+=`<rect x="220" y="${y-11}" width="12" height="12" fill="${colors[i]}"></rect><text class="label" x="240" y="${y}">${esc(d.label)}</text><text class="value" text-anchor="end" x="${W-8}" y="${y}">${d.value} (${(d.value/10).toFixed(1)}%)</text>`}); svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('height',H);svg.innerHTML=out;
+              data.critical.forEach((d,i)=>{let y=54+i*40;out+=`<rect x="220" y="${y-11}" width="12" height="12" fill="${colors[i]}"></rect><text class="label" x="240" y="${y-1}">${esc(d.label)}</text><text class="muted" x="240" y="${y+13}">${d.value} (${(d.value/10).toFixed(1)}%)</text>`}); svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('height',H);svg.innerHTML=out;
             }
             function draw(){ bars('borough',data.borough,{left:94}); bars('cuisine',data.cuisine,{left:132,row:27}); donut(); bars('years',data.years,{left:52,row:31}); bars('action',data.action,{left:132,row:31}); }
             new ResizeObserver(draw).observe(root); draw();
@@ -420,9 +420,10 @@ python3 data/restaurant-analysis/download_data.py    # first: pulls the complete
 python3 analyze_reinspection_model.py                # borough-adjusted logistic model (~15s)
 python3 investigate_borough_gap.py                   # round 1 of the mechanism hunt (~25s)
 python3 investigate_deeper_mechanisms.py             # round 2 of the mechanism hunt (~15s)
+python3 check_model_specification.py                 # specification checks, see INVESTIGATION.md (~15s)
 python3 -m unittest discover -s tests -v             # run the test suite</code></pre>
       <p class="section-intro" style="margin-top: 10px;">
-        All three exit with a clear message (not a traceback) if you skip the first
+        All four exit with a clear message (not a traceback) if you skip the first
         step. None of them print anything while working — if one goes quiet for a
         while, that's expected, not stuck.
       </p>
@@ -432,10 +433,11 @@ python3 -m unittest discover -s tests -v             # run the test suite</code>
         <li><a href="README.md">README.md</a> — canonical write-up of the finding.</li>
         <li><a href="NOTES.md">NOTES.md</a> — source data structure and gotchas.</li>
         <li><a href="INVESTIGATION.md">INVESTIGATION.md</a> — the two-round mechanism-hunt write-up.</li>
-        <li><a href="regression.py">regression.py</a> — shared pairing logic, IRLS fit, and clustered standard errors used by both scripts below.</li>
+        <li><a href="regression.py">regression.py</a> — shared pairing logic, IRLS fit, and clustered standard errors used by every script below.</li>
         <li><a href="analyze_reinspection_model.py">analyze_reinspection_model.py</a> — the restaurant-clustered logistic regression.</li>
         <li><a href="investigate_borough_gap.py">investigate_borough_gap.py</a> — round 1: tests three candidate mechanisms.</li>
         <li><a href="investigate_deeper_mechanisms.py">investigate_deeper_mechanisms.py</a> — round 2: density, reporting lag, inspector assignment.</li>
+        <li><a href="check_model_specification.py">check_model_specification.py</a> — tests the main model's functional-form assumptions; see INVESTIGATION.md's "A specification check, held to the same standard."</li>
         <li><a href="tests/test_regression.py">tests/test_regression.py</a> / <a href="tests/test_borough_gap.py">tests/test_borough_gap.py</a> / <a href="tests/test_supabase_load_data.py">tests/test_supabase_load_data.py</a> — automated tests.</li>
         <li><a href=".github/workflows/tests.yml">.github/workflows/tests.yml</a> — runs the test suite on every push/PR.</li>
         <li><a href="data/sample_1000.json">data/sample_1000.json</a> — 1,000-row raw sample.</li>
