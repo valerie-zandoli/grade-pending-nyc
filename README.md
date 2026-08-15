@@ -279,6 +279,11 @@ reach a browser.
 - Cuisine categories with fewer than 20 observations are folded into "Other"
   to avoid unstable single-cell estimates, which trades cuisine-level detail
   for model stability the same way the year-bucketing does.
+- The main model assumes a linear score effect and a constant borough
+  effect across score levels. Both assumptions are testably wrong in ways
+  that don't overturn the headline conclusion but do complicate it —
+  see [`INVESTIGATION.md`](INVESTIGATION.md#a-specification-check-held-to-the-same-standard),
+  read with the same multiple-testing caution as the point above.
 - `SNAPSHOT_CUTOFF` in `download_data.py` is a fixed date, not "today" —
   reproducing this analysis exactly requires using that pinned date; pulling
   fresh data from a later cutoff will (correctly) reflect a different,

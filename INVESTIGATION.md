@@ -130,3 +130,50 @@ least one nominally "significant" result among four by chance alone is
 ~18.5%, not 5% — and a Bonferroni-corrected threshold for four comparisons
 (α=.0125) isn't cleared by Bronx or Queens. "Borderline" is the right word
 for the uncorrected number; it isn't evidence the effect is nearly real.
+
+## A specification check, held to the same standard
+
+Everything above tests whether *other variables* explain the gap. A
+separate question: is the main model's functional form — a linear score
+effect, a constant borough effect across score levels — actually right?
+Loosening both against the complete dataset:
+
+- **Nonlinearity in score.** Adding a squared `initial_score` term to the
+  main model: OR=0.985, p=.004. Real and significant — the relationship
+  between initial citation severity and the odds of re-grading to A isn't
+  a straight line.
+- **Borough × score interaction.** Adding `borough × initial_score` terms
+  for Bronx and Queens: Bronx's is not significant (OR=0.976, p=.649).
+  Queens's is (OR=1.099, p=.005). Worked through at specific score values,
+  this says a Queens restaurant with a clean initial inspection
+  (score=0) looks *better* than Manhattan in this specification (OR≈0.84),
+  and one with a bad initial inspection (score=40) looks *worse*
+  (OR≈1.22) — crossing from favorable to unfavorable right around the
+  data's median score (25). Both borough *main effects* in this expanded
+  model — now meaning "at score=0," not "on average" — stay
+  non-significant (Bronx p=.263, Queens p=.107), so this doesn't overturn
+  the "no significant uniform gap" conclusion above; it says that if a
+  gap exists, it isn't uniform.
+
+Read this with the same caution as the multiple-comparisons note just
+above, more so: this is now a fourth and fifth specification tried against
+the same underlying comparison (main model, round 1, round 2, and now a
+squared term plus two interaction terms), which is exactly the kind of
+exploratory search that inflates false-positive risk beyond what any one
+of these p-values reports on its own. Finding one significant interaction
+this way is a hypothesis for a dedicated, pre-registered follow-up — not a
+confirmed refinement to the headline finding, and not treated as one
+anywhere else in this repo.
+
+Two more checks, run for completeness rather than because either changed
+the picture: the design matrix's condition number is elevated (395) but
+every borough dummy's variance inflation factor against the rest of the
+model is ~1.05, so multicollinearity isn't the reason the borough
+estimates are what they are. And B/C outcomes — collapsed into one
+"not-A" category everywhere else in this repo — split unevenly by borough
+in a raw, unadjusted comparison: among restaurants moving off an A grade,
+Queens's excess (relative to Manhattan) shows up somewhat more in the C
+column (16.5% vs. 12.0% land at C, vs. 27.4% vs. 22.3% at B) than the B
+column, a hint that "worse" outcomes may carry more of whatever signal
+exists than "somewhat worse" ones — not a tested claim, just a pattern
+worth a dedicated ordinal-outcome model if this ever gets revisited.
