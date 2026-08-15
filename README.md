@@ -147,7 +147,7 @@ pip install -r requirements.txt
   regenerate locally with `python3 download_data.py` from that directory).
 - [`regression.py`](regression.py) — the shared statistics module: the
   initial→re-inspection pairing logic, the hand-rolled IRLS logistic fit, and
-  the restaurant-clustered standard errors. Both scripts below import it
+  the restaurant-clustered standard errors. Every script below imports it
   rather than each keeping their own copy.
 - [`analyze_reinspection_model.py`](analyze_reinspection_model.py) — the
   restaurant-clustered logistic regression described above.
