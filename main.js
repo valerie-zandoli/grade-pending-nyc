@@ -6,6 +6,8 @@
 
   const setActive = id => {
     links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${id}`));
+    const active = document.querySelector('.site-nav a.active');
+    if (active) active.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   };
 
   const observer = new IntersectionObserver(entries => {
