@@ -186,7 +186,8 @@ def main() -> None:
                 "n_paired": len(d),
                 "b_or_c_rate": d["b_or_c"].mean(),
             }
-        )
+        ),
+        include_groups=False,
     )
     print(recur.round(3).reindex(BOROUGHS))
 
