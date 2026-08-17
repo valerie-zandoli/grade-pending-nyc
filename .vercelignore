@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+*.pyc
+
+# Regenerable via data/restaurant-analysis/download_data.py — ~270MB, far
+# over Vercel's 100MB per-file upload limit, and not needed to serve the
+# static site (index.html only reads the small sample/summary JSON files).
+data/restaurant-analysis/restaurant_data.json
+
+.env
+.env*
+.claude/
+01ChatGradePending.md

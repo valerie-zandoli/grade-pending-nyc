@@ -18,3 +18,5 @@ data/restaurant-analysis/restaurant_data.json
 # narration, not polished content, not referenced anywhere. Kept locally,
 # not part of what's published.
 01ChatGradePending.md
+.vercel
+.env*
