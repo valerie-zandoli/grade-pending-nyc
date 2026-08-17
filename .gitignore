@@ -13,3 +13,8 @@ data/restaurant-analysis/restaurant_data.json
 # Local dev-server config for previewing index.html (no secrets in it,
 # just a launch command) — personal convenience, not part of the project.
 .claude/
+
+# Archival transcript of an early session on this project -- raw tool-use
+# narration, not polished content, not referenced anywhere. Kept locally,
+# not part of what's published.
+01ChatGradePending.md
