@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grade Pending NYC — Live Check</title>
+<meta name="description" content="Checks the live NYC Open Data restaurant inspection feed, right now, before the borough-gap finding gets recomputed against it.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <strong>Grade Pending NYC</strong>
+    <a href="index.html">Back to the write-up</a>
+  </div>
+</nav>
+
+<main>
+  <section>
+    <div class="wrap">
+      <p class="section-kicker">LIVE CHECK</p>
+      <h2>Does the complete population still exist to check against?</h2>
+      <p class="section-intro">
+        Before this tool can recompute the borough-gap regression against
+        fresh data, it first confirms the live NYC Open Data feed still
+        holds a complete population, not a partial one. An earlier version
+        of this project shipped a wrong-looking result once already,
+        from an unsorted, paginated pull that silently stopped early — see
+        <a href="README.md">README.md</a>'s "Reproducing this" section.
+        This page exists so that mistake cannot happen again unnoticed.
+      </p>
+
+      <div class="chart-block" id="live-check-status" role="status" aria-live="polite">
+        <p>Preparing to check the live feed&hellip;</p>
+      </div>
+
+      <p class="note-block">
+        This page checks row-count completeness only. It does not yet
+        recompute the borough-odds regression or flag a significance
+        crossing against the last confirmed result — that is the next
+        piece to build, not a silent omission.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">Data: NYC DOHMH Restaurant Inspection Results, via NYC Open Data. Built during week 6 of enrollment in Pursuit's AI Native program.</div>
+</footer>
+
+<script src="live-check.js"></script>
+</body>
+</html>
