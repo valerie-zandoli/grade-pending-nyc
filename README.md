@@ -7,6 +7,11 @@ more than half and misses conventional statistical significance.** The
 apparent disparity looks like it was substantially a small-sample artifact —
 a finding about replication as much as about restaurant grades. See
 [Reproducing this](#reproducing-this) for how that was caught and fixed.
+This project also ships a small, live check guarding against that same
+failure mode going forward — one a data engineer can reuse directly for
+catching a partial pull from any live, paginated feed, not only this one.
+See [Reusing this completeness check in another
+pipeline](#reusing-this-completeness-check-in-another-pipeline).
 
 A restaurant-clustered logistic regression on NYC DOHMH re-inspection outcomes,
 built during week 6 of enrollment in Pursuit's AI Native program.
@@ -103,6 +108,21 @@ weaker, non-significant result above is what the complete population
 actually shows, not a different sample. See Running the analysis below for
 the commands.
 
+### Reusing this completeness check in another pipeline
+
+The same failure mode above — a paginated pull that stops early and hands
+a downstream calculation a partial dataset instead of failing loudly — is
+not specific to restaurant grades or to this feed. Any pipeline pulling
+from a live, paginated source can hit it. [`live-check.js`](live-check.js)
+is a small, working example of the guard: before a calculation runs, it
+sends a single, fast count query (`$select=count(*)`) to the source feed
+and compares the result against the last confirmed complete count. Below
+that count, it halts with no result shown, rather than letting a partial
+pull quietly produce a confident, wrong-looking number the way an earlier
+version of this project once did. The pattern generalizes directly:
+one cheap count check, one stored baseline, one hard stop — ahead of
+whatever calculation the pipeline actually cares about.
+
 ## Modeling choice worth flagging
 
 **Pre-2023 re-inspections are collapsed into a single "2022 or earlier"
@@ -136,6 +156,10 @@ pip install -r requirements.txt
 - [`index.html`](index.html) / [`styles.css`](styles.css) / [`main.js`](main.js) —
   a static one-page site presenting this write-up, deployable as-is to
   GitHub Pages or any static host.
+- [`live-check.html`](live-check.html) / [`live-check.js`](live-check.js) —
+  checks the live feed's row count for completeness before any future
+  live recompute runs against it; see [Reusing this completeness check in
+  another pipeline](#reusing-this-completeness-check-in-another-pipeline).
 - [`NOTES.md`](NOTES.md) — source data structure and gotchas.
 - [`data/sample_1000.json`](data/sample_1000.json) — 1,000-row raw sample.
 - [`data/by_camis.json`](data/by_camis.json) — derived summary of 969
