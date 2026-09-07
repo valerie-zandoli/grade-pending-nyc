@@ -289,6 +289,22 @@ future live site reading from this table would use the public `anon` key
 with row-level security instead, not `service_role`, which should never
 reach a browser.
 
+## What is next for the live check
+
+The next two weeks of build time go to onboarding, not to a journalist-facing
+dashboard or a standalone, reusable library, even though both are real
+requests from real people. Usage data shows nearly every visitor bounces
+before reaching [Reproducing this](#reproducing-this), which means the one
+reader this tool exists for, a journalist deciding whether to trust a
+finding, likely never sees the reasoning that makes the completeness check
+worth trusting. A dashboard would hand her a faster answer to a number she
+may not yet know how to weigh; a library would serve the secondary data
+engineer audience while that primary relationship stays unproven. Both
+requests lose to the same problem underneath them: nobody has shown the
+check earns trust yet, only that it runs. The fix is structural, not a new
+feature — surfacing the reasoning where a skim actually lands, rather than
+past a homepage almost everyone leaves first.
+
 ## Limitations
 
 - The headline result is genuinely weak, not strong: Queens sits right at
