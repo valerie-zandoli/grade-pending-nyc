@@ -28,14 +28,14 @@
   function renderComplete(liveCount) {
     statusEl.innerHTML = `
       <p><strong>The live feed currently holds ${liveCount.toLocaleString()} rows</strong> — at or above the last confirmed complete population (${LAST_CONFIRMED_COUNT.toLocaleString()}).</p>
-      <p class="note">Completeness check passed. The regression recompute and the significance-crossing flag are not built yet on this page -- this check only confirms it would be safe to run them.</p>
+      <p class="note">Completeness check passed: the feed looks whole enough to compute from safely. That is not the same claim as "the borough-gap finding holds" -- this page does not show or recompute that finding, only whether the data underneath it would currently be trustworthy to use. The regression recompute and the significance-crossing flag are not built yet on this page.</p>
     `;
   }
 
   function renderIncomplete(liveCount) {
     statusEl.innerHTML = `
       <p><strong>The live feed returned ${liveCount.toLocaleString()} rows</strong> — below the last confirmed complete population (${LAST_CONFIRMED_COUNT.toLocaleString()}).</p>
-      <p class="note">No verdict shown. A count this low means either the feed or this fetch came back short, and running a regression against it risks the same silent, wrong-looking result this project already fixed once. Falling back to the last confirmed result: see <a href="outputs/reinspection_model_results.txt">outputs/reinspection_model_results.txt</a>.</p>
+      <p class="note">No verdict shown. ${LAST_CONFIRMED_COUNT.toLocaleString()} is a fixed point-in-time reference, not a permanent floor the feed must always clear -- a small, temporary dip below it can happen from a legitimate correction to the source data, not only from a broken pull. Either way, running a regression against a count this low risks the same silent, wrong-looking result this project already fixed once, so none runs until the count recovers. Falling back to the last confirmed result: see <a href="outputs/reinspection_model_results.txt">outputs/reinspection_model_results.txt</a>.</p>
     `;
   }
 
