@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: ["**"]
 
+# This workflow only reads the repo and runs tests -- it never needs to
+# write anything back, so GITHUB_TOKEN gets the minimum permission rather
+# than the (broader) default. Flagged by CodeQL's actions/missing-workflow-permissions.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
