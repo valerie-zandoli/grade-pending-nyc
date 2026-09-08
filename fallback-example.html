@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grade Pending NYC — Fallback Example</title>
+<meta name="description" content="A static, cached example of the live check's result, for the case where the room's own network cannot reach the live page at all.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <strong>Grade Pending NYC</strong>
+    <a href="index.html">Back to the write-up</a>
+  </div>
+</nav>
+
+<main>
+  <section>
+    <div class="wrap">
+      <p class="section-kicker">FALLBACK EXAMPLE — NOT LIVE</p>
+      <h2>What the live check looked like as of a real, recorded run</h2>
+      <p class="section-intro">
+        This page makes no live request. It exists only for the case
+        where the room's network cannot reach
+        <a href="live-check.html">live-check.html</a> at all — a
+        last-resort example, not a substitute for the real thing. Every
+        number below is a genuine result, captured live on
+        2026-09-08, not a hypothetical or a best case chosen for effect.
+      </p>
+
+      <div class="chart-block">
+        <p><strong>The live feed returned 294,829 rows</strong> — below the last confirmed complete population (295,048).</p>
+        <p class="note">No verdict shown. 295,048 is a fixed point-in-time reference, not a permanent floor the feed must always clear — a small, temporary dip below it can happen from a legitimate correction to the source data, not only from a broken pull. Either way, running a regression against a count this low risks the same silent, wrong-looking result this project already fixed once, so none runs until the count recovers. Falling back to the last confirmed result: see <a href="outputs/reinspection_model_results.txt">outputs/reinspection_model_results.txt</a>.</p>
+      </div>
+
+      <p class="note-block">
+        This page checks row-count completeness only. It does not yet
+        recompute the borough-odds regression or flag a significance
+        crossing against the last confirmed result — that is the next
+        piece to build, not a silent omission. A passed check means only
+        that the feed looks whole enough to compute from safely — it
+        says nothing about whether the borough-gap finding itself holds,
+        since that finding is not shown or recomputed on this page.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">Data: NYC DOHMH Restaurant Inspection Results, via NYC Open Data. Built during week 6 of enrollment in Pursuit's AI Native program. This page is a static fallback — see <a href="live-check.html">live-check.html</a> for the real, live check.</div>
+</footer>
+
+</body>
+</html>
