@@ -160,6 +160,11 @@ pip install -r requirements.txt
   checks the live feed's row count for completeness before any future
   live recompute runs against it; see [Reusing this completeness check in
   another pipeline](#reusing-this-completeness-check-in-another-pipeline).
+- [`regression.js`](regression.js) — a JavaScript port of `regression.py`'s
+  clustered logistic fit, for a future in-browser recompute against live
+  data. Checked against the trusted Python result with
+  [`tests/test_regression.js`](tests/test_regression.js), not trusted on
+  its own; not yet wired into a page that pairs and feeds it live data.
 - [`NOTES.md`](NOTES.md) — source data structure and gotchas.
 - [`data/sample_1000.json`](data/sample_1000.json) — 1,000-row raw sample.
 - [`data/by_camis.json`](data/by_camis.json) — derived summary of 969
