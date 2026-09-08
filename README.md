@@ -157,18 +157,30 @@ pip install -r requirements.txt
   a static one-page site presenting this write-up, deployable as-is to
   GitHub Pages or any static host.
 - [`live-check.html`](live-check.html) / [`live-check.js`](live-check.js) —
-  checks the live feed's row count for completeness before any future
-  live recompute runs against it; see [Reusing this completeness check in
-  another pipeline](#reusing-this-completeness-check-in-another-pipeline).
+  checks the live feed's row count for completeness, then (once that check
+  passes) lets a reader pull the complete live table into their own browser
+  and recompute the borough-odds finding against it; see [Reusing this
+  completeness check in another pipeline](#reusing-this-completeness-check-in-another-pipeline).
+- [`pairing.js`](pairing.js) — a JavaScript port of `regression.py`'s
+  `build_paired_dataset`/`design_matrix`: pairs each restaurant's initial
+  and re-inspection visits and builds the borough/cuisine/year dummy design
+  matrix. Checked against the trusted Python pipeline on an identical
+  raw-row subset with [`tests/test_pairing.js`](tests/test_pairing.js), and
+  against the full 295k-row population end to end (matching n=14,414,
+  g=11,095, and all four published odds ratios to within 0.0004).
+- [`regression.js`](regression.js) — a JavaScript port of `regression.py`'s
+  clustered logistic fit. Checked against the trusted Python result with
+  [`tests/test_regression.js`](tests/test_regression.js), not trusted on
+  its own.
+- [`recompute.js`](recompute.js) — wires `pairing.js` and `regression.js`
+  into `live-check.html`: once the completeness check passes, pulls the
+  live feed, refits the model, and flags any borough whose result crosses
+  the conventional 0.05 significance line relative to the published
+  baseline.
 - [`fallback-example.html`](fallback-example.html) — a static, cached
   example of a real completeness-check result, for a demo where the room's
   own network cannot reach the live page at all. Not a substitute for
   `live-check.html`; use only when the live page itself is unreachable.
-- [`regression.js`](regression.js) — a JavaScript port of `regression.py`'s
-  clustered logistic fit, for a future in-browser recompute against live
-  data. Checked against the trusted Python result with
-  [`tests/test_regression.js`](tests/test_regression.js), not trusted on
-  its own; not yet wired into a page that pairs and feeds it live data.
 - [`NOTES.md`](NOTES.md) — source data structure and gotchas.
 - [`data/sample_1000.json`](data/sample_1000.json) — 1,000-row raw sample.
 - [`data/by_camis.json`](data/by_camis.json) — derived summary of 969
@@ -256,6 +268,15 @@ both `pandas==2.3.3` and `numpy==2.0.2` declare `>=3.9` support and ship
 wheels for both, but this hasn't been verified by an actual 3.11 run
 outside CI itself.
 
+**JavaScript ports:** [`tests/test_regression.js`](tests/test_regression.js)
+and [`tests/test_pairing.js`](tests/test_pairing.js) check `regression.js`
+and `pairing.js` (used by `recompute.js` on `live-check.html`) against the
+trusted Python pipeline, not against each other. Both need a fixture
+regenerated from a local `restaurant_data.json` — see the comment at the
+top of each file — and skip with a clear message if that fixture is
+absent. Not part of `tests.yml`'s CI run for the same reason the
+data-gated Python tests aren't: no `restaurant_data.json` in CI.
+
 **Keeping dependencies current:** [`.github/dependabot.yml`](.github/dependabot.yml)
 checks monthly for newer versions of the pinned packages (root and
 `supabase/` `requirements.txt`) and the GitHub Actions used in CI, opening a
@@ -320,6 +341,17 @@ the numbers can be trusted and linking straight to `live-check.html`. The
 nav bar also links to `live-check.html` directly, so the page no longer
 depends on a visitor reaching the bottom `#reproduce` section or clicking
 into this README to find it.
+
+**Also done (08 Sept 2026):** the regression recompute and significance-
+crossing flag this section once called "not built yet" are built.
+`pairing.js` ports `regression.py`'s pairing/design-matrix pipeline, and
+`recompute.js` wires it to `regression.js` on `live-check.html`: once the
+completeness check passes, a reader can pull the live feed into their own
+browser and see whether any borough's result has crossed the conventional
+0.05 significance line since the published baseline. Verified against the
+trusted Python pipeline on the full 295k-row population (exact match on
+n, cluster count, and all four odds ratios to within 0.0004), and against
+the real live feed in-browser end to end.
 
 ## Limitations
 
