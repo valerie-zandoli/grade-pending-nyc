@@ -36,13 +36,15 @@
       </div>
 
       <p class="note-block">
-        This page checks row-count completeness only. It does not yet
-        recompute the borough-odds regression or flag a significance
-        crossing against the last confirmed result — that is the next
-        piece to build, not a silent omission. A passed check means only
-        that the feed looks whole enough to compute from safely — it
-        says nothing about whether the borough-gap finding itself holds,
-        since that finding is not shown or recomputed on this page.
+        This static page freezes the completeness check's result only,
+        captured on the date above — it cannot show a live recompute,
+        since it makes no network request at all. The real
+        <a href="live-check.html">live-check.html</a> now also recomputes
+        the borough-odds regression once its completeness check passes,
+        flagging any borough whose result crosses the conventional 0.05
+        significance line against the published baseline; this fallback
+        page exists only for when that live page itself is unreachable,
+        not as a stand-in for what it can do.
       </p>
     </div>
   </section>
