@@ -313,6 +313,14 @@ section > p.section-intro {
   margin: 0 0 24px;
 }
 
+.note-block.trust-callout {
+  margin: 18px 0 0;
+}
+
+.note-block.trust-callout a {
+  font-weight: 600;
+}
+
 code, pre {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
