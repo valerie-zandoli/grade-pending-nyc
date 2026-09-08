@@ -45,14 +45,18 @@
       </div>
 
       <p class="note-block">
-        This page checks row-count completeness only. It does not yet
-        recompute the borough-odds regression or flag a significance
-        crossing against the last confirmed result — that is the next
-        piece to build, not a silent omission. A passed check below means
-        only that the feed looks whole enough to compute from safely — it
-        says nothing about whether the borough-gap finding itself holds,
-        since that finding is not shown or recomputed on this page.
+        This page checks row-count completeness first, automatically. Once
+        that check passes, a second step below lets you pull the complete
+        live table into your own browser and recompute the borough-odds
+        finding against it, flagging any borough whose result crosses the
+        conventional 0.05 significance line relative to the published
+        baseline. A passed completeness check on its own still says only
+        that the feed looks whole enough to compute from safely — not that
+        the borough-gap finding holds; the recompute step is what actually
+        checks that.
       </p>
+
+      <div id="recompute-section"></div>
     </div>
   </section>
 </main>
@@ -61,6 +65,9 @@
   <div class="wrap">Data: NYC DOHMH Restaurant Inspection Results, via NYC Open Data. Built during week 6 of enrollment in Pursuit's AI Native program.</div>
 </footer>
 
+<script src="pairing.js"></script>
+<script src="regression.js"></script>
+<script src="recompute.js"></script>
 <script src="live-check.js"></script>
 </body>
 </html>

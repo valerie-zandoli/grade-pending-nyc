@@ -28,8 +28,9 @@
   function renderComplete(liveCount) {
     statusEl.innerHTML = `
       <p><strong>The live feed currently holds ${liveCount.toLocaleString()} rows</strong> — at or above the last confirmed complete population (${LAST_CONFIRMED_COUNT.toLocaleString()}).</p>
-      <p class="note">Completeness check passed: the feed looks whole enough to compute from safely. That is not the same claim as "the borough-gap finding holds" -- this page does not show or recompute that finding, only whether the data underneath it would currently be trustworthy to use. The regression recompute and the significance-crossing flag are not built yet on this page.</p>
+      <p class="note">Completeness check passed: the feed looks whole enough to compute from safely. That is not the same claim as "the borough-gap finding holds" -- this page does not show that finding on its own, only whether the data underneath it would currently be trustworthy to recompute against. See below to run that recompute.</p>
     `;
+    document.dispatchEvent(new CustomEvent("livecheck:complete", { detail: { liveCount } }));
   }
 
   function renderIncomplete(liveCount) {
