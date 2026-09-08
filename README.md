@@ -160,6 +160,10 @@ pip install -r requirements.txt
   checks the live feed's row count for completeness before any future
   live recompute runs against it; see [Reusing this completeness check in
   another pipeline](#reusing-this-completeness-check-in-another-pipeline).
+- [`fallback-example.html`](fallback-example.html) — a static, cached
+  example of a real completeness-check result, for a demo where the room's
+  own network cannot reach the live page at all. Not a substitute for
+  `live-check.html`; use only when the live page itself is unreachable.
 - [`regression.js`](regression.js) — a JavaScript port of `regression.py`'s
   clustered logistic fit, for a future in-browser recompute against live
   data. Checked against the trusted Python result with
