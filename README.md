@@ -314,6 +314,13 @@ check earns trust yet, only that it runs. The fix is structural, not a new
 feature — surfacing the reasoning where a skim actually lands, rather than
 past a homepage almost everyone leaves first.
 
+**Done (08 Sept 2026):** `index.html`'s hero now carries a short, visible
+callout right below the headline stats — before any scrolling — stating why
+the numbers can be trusted and linking straight to `live-check.html`. The
+nav bar also links to `live-check.html` directly, so the page no longer
+depends on a visitor reaching the bottom `#reproduce` section or clicking
+into this README to find it.
+
 ## Limitations
 
 - The headline result is genuinely weak, not strong: Queens sits right at
