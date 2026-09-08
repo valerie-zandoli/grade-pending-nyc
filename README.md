@@ -156,6 +156,13 @@ pip install -r requirements.txt
 - [`index.html`](index.html) / [`styles.css`](styles.css) / [`main.js`](main.js) —
   a static one-page site presenting this write-up, deployable as-is to
   GitHub Pages or any static host.
+- [`docs/README.md`](docs/README.md) — an exact copy of this file, kept in
+  sync by [`tests/test_docs_mirror.py`](tests/test_docs_mirror.py). Exists
+  because Vercel's static deploy silently excludes a root-level `README.md`
+  from what it actually serves (confirmed: every case variant of
+  `/README.md` 404s in production, while this one directory down serves
+  fine) — `index.html` and `live-check.html` link here instead of to the
+  root file so those links resolve on the live site.
 - [`live-check.html`](live-check.html) / [`live-check.js`](live-check.js) —
   checks the live feed's row count for completeness, then (once that check
   passes) lets a reader pull the complete live table into their own browser
