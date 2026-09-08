@@ -20,15 +20,24 @@
   <section>
     <div class="wrap">
       <p class="section-kicker">LIVE CHECK</p>
-      <h2>Does the complete population still exist to check against?</h2>
+      <h2>Is today's live data whole enough to trust?</h2>
       <p class="section-intro">
-        Before this tool can recompute the borough-gap regression against
-        fresh data, it first confirms the live NYC Open Data feed still
-        holds a complete population, not a partial one. An earlier version
-        of this project shipped a wrong-looking result once already,
-        from an unsorted, paginated pull that silently stopped early — see
-        <a href="README.md">README.md</a>'s "Reproducing this" section.
-        This page exists so that mistake cannot happen again unnoticed.
+        This project asks whether NYC restaurants in different boroughs
+        have different odds of recovering an A grade after a health
+        violation — a question that only gets a trustworthy answer if it
+        is checked against every inspection record NYC has published, not
+        a partial slice of them. This page runs that one check, right
+        now, against the live feed: does the row count still look like
+        the complete record set, or has something come back short?
+      </p>
+      <p class="section-intro">
+        The stakes are not hypothetical. An earlier version of this
+        project pulled data in a way that silently stopped early and
+        produced a confident, wrong-looking result — see
+        <a href="README.md">README.md</a>'s "Reproducing this" section for
+        the full story. This page exists so a partial pull gets caught
+        here, before it can feed a calculation, rather than discovered
+        later the way it was the first time.
       </p>
 
       <div class="chart-block" id="live-check-status" role="status" aria-live="polite">
