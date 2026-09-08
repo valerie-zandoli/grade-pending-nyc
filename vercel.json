@@ -1,5 +1,8 @@
 {
   "framework": null,
   "buildCommand": null,
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/README.md", "destination": "/README.md" }
+  ]
 }
